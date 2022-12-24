@@ -13,6 +13,6 @@ public class CommonAPI {
 
     @GetMapping("/test")
     public String getListNewsLasts(){
-        return "anh yeu em nhieu lam";
+        return "Test jenkins auto build and deploy";
     }
 }
