@@ -1,4 +1,4 @@
-package net.codejava.crawnew.common;
+package net.etaservice.crawnew.common;
 
 import java.util.ArrayList;
 import java.util.List;

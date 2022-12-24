@@ -1,8 +1,8 @@
-package net.codejava.crawnew.crawlBacth;
+package net.etaservice.crawnew.crawlBacth;
 
-import net.codejava.crawnew.common.StringUtils;
-import net.codejava.crawnew.model.New;
-import net.codejava.crawnew.service.NewService;
+import net.etaservice.crawnew.common.StringUtils;
+import net.etaservice.crawnew.model.New;
+import net.etaservice.crawnew.service.NewService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

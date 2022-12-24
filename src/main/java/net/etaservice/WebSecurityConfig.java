@@ -1,4 +1,4 @@
-package net.codejava;
+package net.etaservice;
 
 import javax.sql.DataSource;
 

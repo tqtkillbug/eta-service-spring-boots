@@ -1,7 +1,7 @@
-package net.codejava.appmanager.api;
+package net.etaservice.appmanager.api;
 
-import net.codejava.appmanager.model.RequestApp;
-import net.codejava.appmanager.repository.RequetsAppRepository;
+import net.etaservice.appmanager.model.RequestApp;
+import net.etaservice.appmanager.repository.RequetsAppRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

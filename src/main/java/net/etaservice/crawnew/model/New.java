@@ -1,4 +1,4 @@
-package net.codejava.crawnew.model;
+package net.etaservice.crawnew.model;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package net.codejava;
+package net.etaservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

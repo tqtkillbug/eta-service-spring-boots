@@ -1,7 +1,7 @@
-package net.codejava.crawnew.service;
+package net.etaservice.crawnew.service;
 
-import net.codejava.crawnew.model.New;
-import net.codejava.crawnew.repository.NewRepository;
+import net.etaservice.crawnew.model.New;
+import net.etaservice.crawnew.repository.NewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package net.codejava.appmanager.model;
+package net.etaservice.appmanager.model;
 
 import lombok.Data;
 import lombok.Getter;
