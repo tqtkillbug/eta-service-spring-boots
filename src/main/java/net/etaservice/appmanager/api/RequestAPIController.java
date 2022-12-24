@@ -17,7 +17,7 @@ public class RequestAPIController {
 
     @CrossOrigin
     @PostMapping("/ping")
-    public String pingRequest(@RequestBody RequestApp requestApp, HttpServletRequest request) {
+    public String pingRequest(RequestApp requestApp, HttpServletRequest request) {
         if (requestApp == null) {
         } else {
             RequestApp requestAppSave = new RequestApp();
