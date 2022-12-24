@@ -15,6 +15,7 @@ public class RequestAPIController {
     @Autowired
     private RequetsAppRepository requetsAppRepository;
 
+    @CrossOrigin
     @PostMapping("/ping")
     public String pingRequest(@RequestBody RequestApp requestApp, HttpServletRequest request) {
         if (requestApp == null) {
