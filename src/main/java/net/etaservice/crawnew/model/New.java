@@ -2,6 +2,7 @@ package net.etaservice.crawnew.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.Date;
 @Table(name = "news")
 @Getter
 @Setter
+@ToString
 public class New {
 
     @Id
@@ -45,4 +47,13 @@ public class New {
 
     public New() {
     }
+
+    public boolean isEmpty(){
+        if (this.getTitle() == null || this.getTitle().trim().equals("") || this.getUrlFull() == null || this.getUrlFull().trim().equals("") || this.getUrlThumbImage() == null || this.getUrlThumbImage().trim().equals("")) {
+            return false;
+        }
+        return  true;
+    }
+
+
 }
