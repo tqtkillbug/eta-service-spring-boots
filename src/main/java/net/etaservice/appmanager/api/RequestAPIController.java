@@ -1,6 +1,10 @@
 package net.etaservice.appmanager.api;
 
+import com.google.gson.Gson;
+import net.etaservice.appmanager.model.AppInfo;
 import net.etaservice.appmanager.model.RequestApp;
+import net.etaservice.appmanager.model.dto.AppInfoDTO;
+import net.etaservice.appmanager.repository.AppInfoRepository;
 import net.etaservice.appmanager.repository.RequetsAppRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +19,13 @@ public class RequestAPIController {
     @Autowired
     private RequetsAppRepository requetsAppRepository;
 
+    @Autowired
+    private AppInfoRepository appInfoRepository;
+
     @CrossOrigin
     @PostMapping("/ping")
     public String pingRequest(RequestApp requestApp, HttpServletRequest request) {
+        String response = "";
         if (requestApp == null) {
         } else {
             RequestApp requestAppSave = new RequestApp();
@@ -25,8 +33,15 @@ public class RequestAPIController {
             requestAppSave.setAppName(requestApp.getAppName());
             requestAppSave.setIpAddress(request.getRemoteAddr());
             requetsAppRepository.saveAndFlush(requestAppSave);
+            if (requestApp.getAppName() != null){
+                AppInfo appInfo = appInfoRepository.findByAppCode(requestApp.getAppName());
+                if (appInfo != null){
+                    AppInfoDTO appInfoDTO = appInfo.toDTO();
+                    response = new Gson().toJson(appInfoDTO);
+                }
+            }
         }
-        return "OK";
+        return response;
     }
 
     @GetMapping("/test")
