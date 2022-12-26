@@ -1,5 +1,6 @@
 package net.etaservice.crawnew.crawlBacth;
 
+import lombok.extern.slf4j.Slf4j;
 import net.etaservice.crawnew.common.StringUtils;
 import net.etaservice.crawnew.model.New;
 import net.etaservice.crawnew.service.NewService;
@@ -22,10 +23,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class CrawlNewBatch {
 
     @Autowired
     private NewService newService;
+
 
     private static final String SOURCE_NEWS_KENH14 = "Kenh14";
     private static final String SOURCE_NEWS_GENK = "GenK";
@@ -33,7 +36,7 @@ public class CrawlNewBatch {
 
     @Scheduled(fixedDelay = 3600000)
     public void scheduleFixedDelayTask() throws IOException {
-        System.out.println("Crawl Data News one time one hours - " + new Date());
+         log.info("Crawl Data News one time one hours - " + new Date());
         try {
             getNewsKenh14();
             getNewsFromGenk();
@@ -45,7 +48,7 @@ public class CrawlNewBatch {
 
 
     public void getNewsKenh14() throws IOException {
-        System.out.println("----------------START CRAWL FROM KENH14--------------------");
+        log.info("START CRAWL FROM KENH14");
         List<New> listNewKenh14 = new ArrayList<>();
         Date date = new Date();
         String targetUrl = "https://kenh14.vn";
@@ -94,11 +97,11 @@ public class CrawlNewBatch {
             listNewKenh14.removeIf(new_s -> !new_c.isEmpty() || new_c.getUrlFull().equals(new_s.getUrlFull()) || new_c.getTitle().equals(new_s.getTitle()));
         }
         this.newService.saveAll(listNewKenh14);
-        System.out.println("--------END--------INSERT "+ listNewKenh14.size() + "  KENH14 NEWS--------------------");
+        log.info(" --END --INSERT "+ listNewKenh14.size() + "  KENH14 NEWS   --");
     }
 
     public void getNewsFromGenk() throws IOException {
-        System.out.println("----------------START CRAWL FROM GENK--------------------");
+         log.info("START CRAWL FROM GENK");
         List<New> listNewGenK = new ArrayList<>();
         Date now = new Date();
         String targetUrl = "https://genk.vn";
@@ -146,7 +149,7 @@ public class CrawlNewBatch {
             listNewGenK.removeIf(new_s -> !new_c.isEmpty() || new_c.getUrlFull().equals(new_s.getUrlFull()) || new_c.getTitle().equals(new_s.getTitle()));
         }
         this.newService.saveAll(listNewGenK);
-        System.out.println("----------END------INSERT "+ listNewGenK.size() + "  GENK NEWS--------------------");
+         log.info("END INSERT "+ listNewGenK.size() + "  GENK NEWS ");
     }
 
     public void getNewsFromCafebiz() throws IOException {
@@ -190,7 +193,7 @@ public class CrawlNewBatch {
             listNewCafebiz.removeIf(new_s -> !new_c.isEmpty() || new_c.getUrlFull().equals(new_s.getUrlFull()) || new_c.getTitle().equals(new_s.getTitle()));
         }
         this.newService.saveAll(listNewCafebiz);
-        System.out.println("----------END------INSERT "+ listNewCafebiz.size() + "  CAFEBIZ NEWS--------------------");
+         log.info(" END INSERT "+ listNewCafebiz.size() + "  CAFEBIZ NEWS ");
 
     }
 
