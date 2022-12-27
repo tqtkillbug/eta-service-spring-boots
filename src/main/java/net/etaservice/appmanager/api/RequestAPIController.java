@@ -31,7 +31,7 @@ public class RequestAPIController {
             RequestApp requestAppSave = new RequestApp();
             requestAppSave.setRequestDate(new Date());
             requestAppSave.setAppName(requestApp.getAppName());
-            requestAppSave.setIpAddress(request.getRemoteAddr());
+            requestAppSave.setIpAddress(requestApp.getIpAddress());
             requetsAppRepository.saveAndFlush(requestAppSave);
             if (requestApp.getAppName() != null){
                 AppInfo appInfo = appInfoRepository.findByAppCode(requestApp.getAppName());
