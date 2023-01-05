@@ -56,11 +56,15 @@ public class RequestAPIController {
 
     @GetMapping("/test")
     public String test() {
-        return "OKOKOKOKOKOKO";
+        List<New> newList = new ArrayList<>();
+        newList = newRepository.getListNewLastByLimit(4);
+        Collections.shuffle(newList);
+        String newJson =  new Gson().toJson(newList);
+        return newJson;
     }
 
     @GetMapping("/news/last")
-    public String getListNewsLast(HttpServletRequest request){
+    public String getListNewsLast(){
         List<New> newList = new ArrayList<>();
         newList = newRepository.getListNewLastByLimit(4);
         Collections.shuffle(newList);
