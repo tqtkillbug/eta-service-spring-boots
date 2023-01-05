@@ -59,7 +59,6 @@ public class RequestAPIController {
         return "OKOKOKOKOKOKO";
     }
 
-    @CrossOrigin
     @GetMapping("/news/last")
     public String getListNewsLast(HttpServletRequest request){
         List<New> newList = new ArrayList<>();
