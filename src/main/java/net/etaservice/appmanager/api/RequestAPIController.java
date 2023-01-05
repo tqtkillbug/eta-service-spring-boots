@@ -6,11 +6,16 @@ import net.etaservice.appmanager.model.RequestApp;
 import net.etaservice.appmanager.model.dto.AppInfoDTO;
 import net.etaservice.appmanager.repository.AppInfoRepository;
 import net.etaservice.appmanager.repository.RequetsAppRepository;
+import net.etaservice.crawnew.model.New;
+import net.etaservice.crawnew.repository.NewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/free/app")
@@ -21,6 +26,11 @@ public class RequestAPIController {
 
     @Autowired
     private AppInfoRepository appInfoRepository;
+
+
+    @Autowired
+    private NewRepository newRepository;
+
 
     @CrossOrigin
     @PostMapping("/ping")
@@ -48,4 +58,15 @@ public class RequestAPIController {
     public String test() {
         return "OKOKOKOKOKOKO";
     }
+
+    @CrossOrigin
+    @GetMapping("/news/last")
+    public String getListNewsLast(HttpServletRequest request){
+        List<New> newList = new ArrayList<>();
+        newList = newRepository.getListNewLastByLimit(4);
+        Collections.shuffle(newList);
+        String jsonNews =  new Gson().toJson(newList);
+        return jsonNews;
+    }
+
 }
