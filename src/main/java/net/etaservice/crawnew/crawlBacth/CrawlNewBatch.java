@@ -38,12 +38,22 @@ public class CrawlNewBatch {
     public void scheduleFixedDelayTask() throws IOException {
         log.info("Crawl Data News one 45 minutes one hours - " + new Date());
         try {
-            getNewsKenh14();
-            getNewsFromGenk();
             getNewsFromCafebiz();
         } catch (IOException e) {
+            try {
+                getNewsKenh14();
+            } catch (IOException ex) {
+                try {
+                    getNewsFromGenk();
+                } catch (IOException exc) {
+                    exc.printStackTrace();
+                }
+                ex.printStackTrace();
+            }
             e.printStackTrace();
         }
+        getNewsKenh14();
+        getNewsFromGenk();
     }
 
 
