@@ -34,9 +34,9 @@ public class CrawlNewBatch {
     private static final String SOURCE_NEWS_GENK = "GenK";
     private static final String SOURCE_NEWS_CAFEBIZ = "CafeBiz";
 
-    @Scheduled(fixedDelay = 3600000)
+    @Scheduled(fixedDelay = 2700000)
     public void scheduleFixedDelayTask() throws IOException {
-         log.info("Crawl Data News one time one hours - " + new Date());
+        log.info("Crawl Data News one 45 minutes one hours - " + new Date());
         try {
             getNewsKenh14();
             getNewsFromGenk();
