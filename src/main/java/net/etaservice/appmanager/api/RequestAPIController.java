@@ -1,6 +1,7 @@
 package net.etaservice.appmanager.api;
 
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import net.etaservice.appmanager.model.AppInfo;
 import net.etaservice.appmanager.model.RequestApp;
 import net.etaservice.appmanager.model.dto.AppInfoDTO;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/free/app")
+@Slf4j
 public class RequestAPIController {
 
     @Autowired
@@ -35,6 +37,7 @@ public class RequestAPIController {
     @CrossOrigin
     @PostMapping("/ping")
     public String pingRequest(RequestApp requestApp, HttpServletRequest request) {
+        log.info("TEST API");
         String response = "";
         if (requestApp == null) {
         } else {
