@@ -38,22 +38,22 @@ public class RequestAPIController {
     @PostMapping("/ping")
     public String pingRequest(RequestApp requestApp, HttpServletRequest request) {
         log.info("TEST API");
-        String response = "";
-        if (requestApp == null) {
-        } else {
-            RequestApp requestAppSave = new RequestApp();
-            requestAppSave.setRequestDate(new Date());
-            requestAppSave.setAppName(requestApp.getAppName());
-            requestAppSave.setIpAddress(requestApp.getIpAddress());
-            requetsAppRepository.saveAndFlush(requestAppSave);
-            if (requestApp.getAppName() != null){
-                AppInfo appInfo = appInfoRepository.findByAppCode(requestApp.getAppName());
-                if (appInfo != null){
-                    AppInfoDTO appInfoDTO = appInfo.toDTO();
-                    response = new Gson().toJson(appInfoDTO);
-                }
-            }
-        }
+        String response = "hihihiihi";
+//        if (requestApp == null) {
+//        } else {
+//            RequestApp requestAppSave = new RequestApp();
+//            requestAppSave.setRequestDate(new Date());
+//            requestAppSave.setAppName(requestApp.getAppName());
+//            requestAppSave.setIpAddress(requestApp.getIpAddress());
+//            requetsAppRepository.saveAndFlush(requestAppSave);
+//            if (requestApp.getAppName() != null){
+//                AppInfo appInfo = appInfoRepository.findByAppCode(requestApp.getAppName());
+//                if (appInfo != null){
+//                    AppInfoDTO appInfoDTO = appInfo.toDTO();
+//                    response = new Gson().toJson(appInfoDTO);
+//                }
+//            }
+//        }
         return response;
     }
 
