@@ -1,7 +1,6 @@
 package net.etaservice.appmanager.api;
 
 import com.google.gson.Gson;
-import lombok.extern.slf4j.Slf4j;
 import net.etaservice.appmanager.model.AppInfo;
 import net.etaservice.appmanager.model.RequestApp;
 import net.etaservice.appmanager.model.dto.AppInfoDTO;
@@ -32,7 +31,6 @@ public class RequestAPIController {
     @Autowired
     private NewRepository newRepository;
 
-
     @CrossOrigin
     @PostMapping("/ping")
     public String pingRequest(RequestApp requestApp, HttpServletRequest request) {
@@ -55,15 +53,16 @@ public class RequestAPIController {
         return response;
     }
 
-    @GetMapping("/test")
-    public String test() {
-        List<New> newList = new ArrayList<>();
-        newList = newRepository.getListNewLastByLimit(4);
-        Collections.shuffle(newList);
-        String newJson =  new Gson().toJson(newList);
-        return newJson;
-    }
+//    @GetMapping("/test")
+//    public String test() {
+//        List<New> newList = new ArrayList<>();
+//        newList = newRepository.getListNewLastByLimit(4);
+//        Collections.shuffle(newList);
+//        String newJson =  new Gson().toJson(newList);
+//        return newJson;
+//    }
 
+    @CrossOrigin
     @GetMapping("/news/last")
     public String getListNewsLast(){
         List<New> newList = new ArrayList<>();
