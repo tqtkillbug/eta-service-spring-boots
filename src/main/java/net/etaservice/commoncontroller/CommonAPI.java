@@ -29,7 +29,6 @@ public class CommonAPI {
         List<New> newList = new ArrayList<>();
         log.info("GET LIST NEWS");
         newList = newRepository.getListNewLastByLimit(4);
-        log.info(newList.size() + "HIIHIHIHIHIHIIH");
         Collections.shuffle(newList);
         String jsonNews =  new Gson().toJson(newList);
         return jsonNews;
