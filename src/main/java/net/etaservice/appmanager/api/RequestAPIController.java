@@ -46,6 +46,6 @@ public class RequestAPIController {
 
     @GetMapping("/test")
     public String test() {
-        return "OKOKOKOKOKOKO";
+        return "HAH ANH YEU EM";
     }
 }
