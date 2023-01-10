@@ -37,21 +37,7 @@ public class CrawlNewBatch {
     @Scheduled(fixedDelay = 2700000)
     public void scheduleFixedDelayTask() throws IOException {
         log.info("Crawl Data News one 45 minutes one hours - " + new Date());
-        try {
-            getNewsFromCafebiz();
-        } catch (IOException e) {
-            try {
-                getNewsKenh14();
-            } catch (IOException ex) {
-                try {
-                    getNewsFromGenk();
-                } catch (IOException exc) {
-                    exc.printStackTrace();
-                }
-                ex.printStackTrace();
-            }
-            e.printStackTrace();
-        }
+        getNewsFromCafebiz();
         getNewsKenh14();
         getNewsFromGenk();
     }
@@ -104,8 +90,9 @@ public class CrawlNewBatch {
         String dateString  = DateFormatUtils.format(now, "yyyy-MM-dd");
         listNewCrawled = newService.getListNewBySourceAndDate(SOURCE_NEWS_KENH14,dateString + "%");
         for (New new_c : listNewCrawled) {
-            listNewKenh14.removeIf(new_s -> !new_c.isEmpty() || new_c.getUrlFull().equals(new_s.getUrlFull()) || new_c.getTitle().equals(new_s.getTitle()));
+            listNewKenh14.removeIf(new_s ->  new_c.getUrlFull().equals(new_s.getUrlFull()) || new_c.getTitle().equals(new_s.getTitle()));
         }
+        listNewKenh14.removeIf(new_s -> new_s.getUrlThumbImage().trim().equals("")|| new_s.getTitle().trim().equals(""));
         this.newService.saveAll(listNewKenh14);
         log.info(" --END --INSERT "+ listNewKenh14.size() + "  KENH14 NEWS   --");
     }
@@ -115,7 +102,8 @@ public class CrawlNewBatch {
         List<New> listNewGenK = new ArrayList<>();
         Date now = new Date();
         String targetUrl = "https://genk.vn";
-        Document doc = Jsoup.connect(targetUrl).get();
+        String targetUrls = "https://genk.vn/tin-ict.chn";
+        Document doc = Jsoup.connect(targetUrls).get();
         Element mainNew = doc.selectXpath("//*[@id=\"admWrapsite\"]/div/div[2]/div[1]/div/div[1]/div/div[1]/div").get(0);
         String fullUrl = targetUrl + mainNew.select("div.gknews_box > a").attr("href");
         String title = mainNew.select("div.gknews_box > a").attr("title");
@@ -156,8 +144,9 @@ public class CrawlNewBatch {
         String dateString  = DateFormatUtils.format(nowNonTime, "yyyy-MM-dd");
         listNewCrawled = newService.getListNewBySourceAndDate(SOURCE_NEWS_GENK,dateString + "%");
         for (New new_c : listNewCrawled) {
-            listNewGenK.removeIf(new_s -> !new_c.isEmpty() || new_c.getUrlFull().equals(new_s.getUrlFull()) || new_c.getTitle().equals(new_s.getTitle()));
+            listNewGenK.removeIf(new_s ->  new_c.getUrlFull().equals(new_s.getUrlFull()) || new_c.getTitle().equals(new_s.getTitle()));
         }
+        listNewGenK.removeIf(new_s -> new_s.getUrlThumbImage().trim().equals("")|| new_s.getTitle().trim().equals(""));
         this.newService.saveAll(listNewGenK);
          log.info("END INSERT "+ listNewGenK.size() + "  GENK NEWS ");
     }
@@ -200,8 +189,9 @@ public class CrawlNewBatch {
         String dateString  = DateFormatUtils.format(nowNonTime, "yyyy-MM-dd");
         listNewCrawled = newService.getListNewBySourceAndDate(SOURCE_NEWS_CAFEBIZ,dateString + "%");
         for (New new_c : listNewCrawled) {
-            listNewCafebiz.removeIf(new_s -> !new_c.isEmpty() || new_c.getUrlFull().equals(new_s.getUrlFull()) || new_c.getTitle().equals(new_s.getTitle()));
+            listNewCafebiz.removeIf(new_s -> new_c.isEmpty() || new_c.getUrlThumbImage().isEmpty() || new_c.getUrlFull().equals(new_s.getUrlFull()) || new_c.getTitle().equals(new_s.getTitle()));
         }
+        listNewCafebiz.removeIf(new_s -> new_s.getUrlThumbImage().trim().equals("")|| new_s.getTitle().trim().equals(""));
         this.newService.saveAll(listNewCafebiz);
          log.info(" END INSERT "+ listNewCafebiz.size() + "  CAFEBIZ NEWS ");
 

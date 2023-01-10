@@ -28,7 +28,7 @@ public class CommonAPI {
     public String getListNewsLast(HttpServletRequest request){
         List<New> newList = new ArrayList<>();
         log.info("GET LIST NEWS");
-        newList = newRepository.getListNewLastByLimit(4);
+        newList = newRepository.getListNewLastByLimit(5);
         Collections.shuffle(newList);
         String jsonNews =  new Gson().toJson(newList);
         return jsonNews;

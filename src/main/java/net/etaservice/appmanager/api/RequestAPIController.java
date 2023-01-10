@@ -66,7 +66,7 @@ public class RequestAPIController {
     @GetMapping("/news/last")
     public String getListNewsLast(){
         List<New> newList = new ArrayList<>();
-        newList = newRepository.getListNewLastByLimit(4);
+        newList = newRepository.getListNewLastByLimit(5);
         Collections.shuffle(newList);
         String jsonNews =  new Gson().toJson(newList);
         return jsonNews;
