@@ -32,3 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 /dev.log
+/dev.log.2023-02-08.0.gz
