@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,9 +44,11 @@ public class AccountAPI {
             Account getRandoms = getRandom.get();
             getRandoms.setIsDeleted(1);
             accountRepository.save(getRandoms);
-            return "oksssssssssssssssssssssss";
+            return "OK";
         }
-        return "nulsssssssssssssssl";
+        return "";
     }
+
+
 
 }
