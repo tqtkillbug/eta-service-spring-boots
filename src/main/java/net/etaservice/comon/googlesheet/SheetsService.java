@@ -29,7 +29,7 @@ public class SheetsService {
 
     private static final List<String> SCOPES =
             Collections.singletonList(SheetsScopes.SPREADSHEETS_READONLY);
-    private static final String CREDENTIALS_FILE_PATH = "/authentication/credentials.json";
+    private static final String CREDENTIALS_FILE_PATH = "/var/lib/jenkins/workspace/Eta-service-project/authentication/credentials.json";
 
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
             throws IOException {
