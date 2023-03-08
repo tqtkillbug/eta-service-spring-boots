@@ -23,7 +23,6 @@ import java.util.*;
 
 @Component
 @PropertySource("application-${spring.profiles.active}.properties")
-//@PropertySource("application-${spring.profiles.active}.properties")
 @EnableConfigurationProperties
 public class BotNotificationService {
 
