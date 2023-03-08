@@ -25,6 +25,7 @@ public class RequestApp {
     @Column(name = "ip_adress", nullable = false)
     private String ipAddress;
 
+    @Temporal(TemporalType.DATE)
     @Column(name = "request_date", nullable = false)
     private Date requestDate;
 

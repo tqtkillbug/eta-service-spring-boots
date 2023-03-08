@@ -1,4 +1,4 @@
-package net.etaservice.crawnew.common;
+package net.etaservice.comon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,5 +43,10 @@ public class StringUtils {
         return  null;
     }
 
+    public static int  getNumberFromAString(String str){
+        String[] parts = str.replaceAll("[^0-9]+", " ").split(" ");
+        String numbers = parts[1];
+        return Integer.parseInt(numbers);
+    }
 
 }

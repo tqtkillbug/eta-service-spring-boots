@@ -1,7 +1,7 @@
 package net.etaservice.crawnew.crawlBacth;
 
 import lombok.extern.slf4j.Slf4j;
-import net.etaservice.crawnew.common.StringUtils;
+import net.etaservice.comon.StringUtils;
 import net.etaservice.crawnew.model.New;
 import net.etaservice.crawnew.service.NewService;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -14,13 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.xml.transform.sax.SAXResult;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
