@@ -13,6 +13,9 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -21,17 +24,22 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@PropertySource("application-${spring.profiles.active}.properties")
+@EnableConfigurationProperties
 public class SheetsService {
     private static final String APPLICATION_NAME = "ETASERVICE SHEET API";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
+    @Value("${sheetapi.tokens.path}")
+    private String TOKENS_DIRECTORY_PATH;
 
+    @Value("${sheetapi.credentials.path}")
+    private String CREDENTIALS_FILE_PATH;
 
     private static final List<String> SCOPES =
-            Collections.singletonList(SheetsScopes.SPREADSHEETS_READONLY);
-    private static final String CREDENTIALS_FILE_PATH = "/var/lib/jenkins/workspace/Eta-service-project/authentication/credentials.json";
+            Collections.singletonList(SheetsScopes.SPREADSHEETS);
 
-    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
+
+    private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
             throws IOException {
         InputStream in = new FileInputStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
@@ -59,28 +67,4 @@ public class SheetsService {
         return service;
     }
 
-//    public static void main(String... args) throws IOException, GeneralSecurityException {
-//        // Build a new authorized API client service.
-//        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-//        final String spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
-//        final String range = "Class Data!A2:E";
-////        Sheets service =
-////                new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-////                        .setApplicationName(APPLICATION_NAME)
-////                        .build();
-//        Sheets service = getSheetService();
-//        ValueRange response = service.spreadsheets().values()
-//                .get(spreadsheetId, range)
-//                .execute();
-//        List<List<Object>> values = response.getValues();
-//        if (values == null || values.isEmpty()) {
-//            System.out.println("No data found.");
-//        } else {
-//            System.out.println("Name, Major");
-//            for (List row : values) {
-//                // Print columns A and E, which correspond to indices 0 and 4.
-//                System.out.printf("%s, %s\n", row.get(0), row.get(4));
-//            }
-//        }
-//    }
 }
