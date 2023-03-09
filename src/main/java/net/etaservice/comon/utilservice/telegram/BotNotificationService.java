@@ -42,6 +42,9 @@ public class BotNotificationService {
     @Autowired
     private SheetsService sheetsService;
 
+    @Autowired
+    private BotController botController;
+
 
     @Value("${telegram.bot.username}")
     public String userName;
@@ -67,7 +70,14 @@ public class BotNotificationService {
         mapCallBackButton.put("currBalance","Current account balance");
         mapCallBackButton.put("spendingThisMonth","Total spending this month");
         mapCallBackButton.put("statistic","Statistics Financial");
+        mapCallBackButton.put("insertspending","Insert Spending");
         return  mapCallBackButton;
+    }
+
+    public static List<String> mapCheckProcess(){
+       List<String> strings = new ArrayList<>();
+       strings.add("insertspending");
+       return strings;
     }
 
     public LimitedQueue<Update> getHistoryUpdate(){
@@ -112,7 +122,17 @@ public class BotNotificationService {
                break;
            default:
                sendMessage.setText("Invalid Command, please choose option following");
-       }
+               List<Update> updateLits = updates.getListElement();
+               Update update1 = updateLits.get(updateLits.size() - 2);
+               System.out.println(updateLits.get(updateLits.size() - 2));
+               if (updateLits.get(updateLits.size() - 2).getCallbackQuery() != null){
+                   if (mapCheckProcess().contains(updateLits.get(updateLits.size() - 2).getCallbackQuery().getData())){
+                       botController.handlerProcess(updateLits, textClient);
+                   }
+               }
+
+
+        }
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
         botNotification.sendMessge(sendMessage);
     }

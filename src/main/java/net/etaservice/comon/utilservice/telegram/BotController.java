@@ -1,7 +1,9 @@
 package net.etaservice.comon.utilservice.telegram;
 
-import com.google.api.services.sheets.v4.model.ValueRange;
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.*;
 import net.etaservice.comon.Constant;
+import net.etaservice.comon.domain.LimitedQueue;
 import net.etaservice.comon.googlesheet.SheetUtils;
 import net.etaservice.comon.googlesheet.SheetsService;
 import net.etaservice.comon.utilservice.telegram.customanotation.BotCallBack;
@@ -15,10 +17,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Controller
 public class BotController {
@@ -100,18 +101,52 @@ public class BotController {
     public void statisticTotalBalance(BotNotificationService botNotificationService, Long chatId) throws GeneralSecurityException, IOException {
         Map<String,String> mapDataResult = getDataFinancialFromSheet(botNotificationService);
         String buildTable = buildStatisticFinancial(mapDataResult);
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         SendMessage sendMessage = new SendMessage();
+        inlineKeyboardMarkup.setKeyboard(buildFunctionPersonalFinance());
+        inlineKeyboardMarkup.getKeyboard().addAll(botNotificationService.buildCommonButton());
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
         sendMessage.setChatId(chatId);
         sendMessage.setText(buildTable);
         sendMessage.setParseMode("Markdown");
         botNotificationService.sendTranferMessage(sendMessage);
     }
 
+    @BotCallBack(name = "insertspending")
+    public void insertNewSpending(BotNotificationService botNotificationService, Long chatId) throws GeneralSecurityException, IOException {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        LocalDate currentDate = LocalDate.now();
+        // Định dạng ngày thành chuỗi
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String cuurDate = currentDate.format(formatter);
+        sendMessage.setText("Bắt đầu nhập khoản chi tiêu, hôm nay là ngày " +cuurDate);
+        botNotificationService.sendTranferMessage(sendMessage);
+    }
+
+
+
+    private void insertDataToSheet(BotNotificationService botNotificationService) throws GeneralSecurityException, IOException {
+        SheetsService sheetsService = botNotificationService.getSheetsService();
+        // Thêm dữ liệu vào sheet
+        String spreadsheetId = Constant.SHEET_CHI_TIEU;
+        String range = "TQT!A13:I13";
+        List<List<Object>> values = Arrays.asList(
+                Arrays.asList(9, 30000, "", "Ăn uống", "", "BIDV")
+        );
+        ValueRange body = new ValueRange().setValues(values);
+        Sheets sheets = sheetsService.service();
+        sheets.spreadsheets().values()
+                .update(spreadsheetId, range, body)
+                .setValueInputOption("USER_ENTERED")
+                .execute();
+    }
+
     private Map<String,String> getDataFinancialFromSheet(BotNotificationService botNotificationService) throws GeneralSecurityException, IOException {
         Map<String,String> cellAndValueMap = new HashMap<>();
         SheetsService sheetsService = botNotificationService.getSheetsService();
         String spreadsheetId = Constant.SHEET_CHI_TIEU;
-        String rangeShet = "TQT!E2:E16";
+        String rangeShet = "COMMON!E2:E16";
         ValueRange response = sheetsService.service().spreadsheets().values()
                 .get(spreadsheetId, rangeShet)
                 .execute();
@@ -127,7 +162,6 @@ public class BotController {
         cellAndValueMap.put("E16",SheetUtils.getCellValue(response,range,"E16"));
         return cellAndValueMap;
     }
-
 
 
 
@@ -161,10 +195,21 @@ private String buildStatisticFinancial(Map<String, String> data) {
         b2.setCallbackData("statistic");
         row1.add(b1);
         row1.add(b2);
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        InlineKeyboardButton b12 = new InlineKeyboardButton();
+        InlineKeyboardButton b22 = new InlineKeyboardButton();
+        b12.setText(callBackMap.get("insertspending"));
+        b12.setCallbackData("insertspending");
+        row2.add(b12);
         keyboard.add(row1);
+        keyboard.add(row2);
         return keyboard;
     }
 
 
-
+    public void handlerProcess(List<Update> updates, String textClient) {
+        if (updates.get(updates.size() - 2).getCallbackQuery().getData().equals("insertspending")){
+            System.out.println("Số tiền chi tiêu:" + textClient);
+        }
+    }
 }
