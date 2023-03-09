@@ -24,7 +24,7 @@ import java.util.List;
 public class SheetsService {
     private static final String APPLICATION_NAME = "ETASERVICE SHEET API";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
+    private static final String TOKENS_DIRECTORY_PATH = "/var/lib/jenkins/workspace/Eta-service-project/tokens/";
 
 
     private static final List<String> SCOPES =
