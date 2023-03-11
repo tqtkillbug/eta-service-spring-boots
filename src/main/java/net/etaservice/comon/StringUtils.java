@@ -1,5 +1,6 @@
 package net.etaservice.comon;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -48,5 +49,20 @@ public class StringUtils {
         String numbers = parts[1];
         return Integer.parseInt(numbers);
     }
+
+    public static boolean isNumberic(String str) {
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch(NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static String formatCuurencyVnd(String amount) {
+        DecimalFormat formatter = new DecimalFormat("#,### đ");
+        return formatter.format(Double.parseDouble(amount));
+    }
+
 
 }

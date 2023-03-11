@@ -53,9 +53,12 @@ public class BotNotificationService {
     public String apiKey;
 
 
-    private static LimitedQueue<Update> updates = new LimitedQueue<>(10);
+    public static LimitedQueue<Update> updates = new LimitedQueue<>(10);
 
 
+    public SheetsService getSheetsService() {
+        return sheetsService;
+    }
 
    public static Map<String,String> mapCallBackButton(){
         Map<String,String> mapCallBackButton = new HashMap<>();
@@ -71,7 +74,38 @@ public class BotNotificationService {
         mapCallBackButton.put("spendingThisMonth","Total spending this month");
         mapCallBackButton.put("statistic","Statistics Financial");
         mapCallBackButton.put("insertspending","Insert Spending");
+        mapCallBackButton.put("addNote","Thêm ghi chú");
+        mapCallBackButton.put("submitSpending","Submit");
+        mapCallBackButton.put("cancelSpending","Cancel");
         return  mapCallBackButton;
+    }
+    public static Map<String,String> mapSpendingType(){
+        Map<String,String> mapSpendingTypeCallBack = new HashMap<>();
+        mapSpendingTypeCallBack.put("anuong","Ăn uống");
+        mapSpendingTypeCallBack.put("tieuvat","Tiêu vặt");
+        mapSpendingTypeCallBack.put("muadodung","Mua đồ dùng");
+        mapSpendingTypeCallBack.put("tienphong","Tiền phòng");
+        mapSpendingTypeCallBack.put("tiengiatdo","Tiền giặt đồ");
+        mapSpendingTypeCallBack.put("tiendichoi","Tiền đi chơi");
+        mapSpendingTypeCallBack.put("tranotindung","Trả nợ tín dụng");
+        mapSpendingTypeCallBack.put("tuthien","Từ Thiện");
+        mapSpendingTypeCallBack.put("cattoc","Cắt tóc");
+        mapSpendingTypeCallBack.put("chomuon","Cho mượn");
+        mapSpendingTypeCallBack.put("muadichvu","Mua dịch vụ");
+        return  mapSpendingTypeCallBack;
+    }
+
+    public static Map<String,String> mapSourceSpending(){
+        Map<String,String> mapSourceSpendingCallBack = new HashMap<>();
+        mapSourceSpendingCallBack.put("bidv","BIDV");
+        mapSourceSpendingCallBack.put("tienmat","Tiền mặt");
+        mapSourceSpendingCallBack.put("tindung","Tín dụng(ghi nợ)");
+        mapSourceSpendingCallBack.put("momo","Momo");
+        mapSourceSpendingCallBack.put("zalopay","ZaloPlay");
+        mapSourceSpendingCallBack.put("shoppePay","Shoppe Pay");
+        mapSourceSpendingCallBack.put("vnpay","VNPay");
+        mapSourceSpendingCallBack.put("timo","Timo");
+        return  mapSourceSpendingCallBack;
     }
 
     public static List<String> mapCheckProcess(){
@@ -92,55 +126,81 @@ public class BotNotificationService {
         botNotification.sendMessge(message);
     }
 
-
     public void handlerCallbackQuery(Update callbackQuery) throws Exception {
-         addUpdate(callbackQuery);
+        addUpdate(callbackQuery);
+        List<Update> updateList = updates.getListElement();
         CallbackQuery query = callbackQuery.getCallbackQuery();
         String data = query.getData();
+        Long fromId = query.getFrom().getId();
+        String chatId = String.valueOf(fromId);
         SendMessage message = new SendMessage();
-        message.setChatId(query.getFrom().getId());
-        if (!mapCallBackButton().containsKey(data)){
+        message.setChatId(fromId);
+
+        if (!mapCallBackButton().containsKey(data)) {
+            int[] indices = {3, 4};
+            for (int i : indices) {
+                if (updateList.size() > i && updateList.get(updateList.size() - i).getCallbackQuery() != null && mapCheckProcess().contains(updateList.get(updateList.size() - i).getCallbackQuery().getData())) {
+                    boolean resultExecute = botController.handlerProcess(updateList, "", this, chatId);
+                    if (resultExecute) return;
+                }
+            }
             message.setText("Function Not Exist Or Not Available!");
+            botNotification.sendMessge(message);
+            return;
         }
-        annotationHandler.callMethodByAnoBotCallBack(data, query.getFrom().getId());
+
+        annotationHandler.callMethodByAnoBotCallBack(data, fromId);
     }
 
-    public void hanlderMessageReceive(Update update) throws Exception {
-       addUpdate(update);
-       Message message = (update.getMessage());
-       String textClient = message.getText();
-       String chatId = String.valueOf(message.getChatId());
-       SendMessage sendMessage = new SendMessage();
-       sendMessage.setChatId(chatId);
+    public void handleMessageReceive(Update update) throws Exception {
+        addUpdate(update);
+        Message message = update.getMessage();
+        String textClient = message.getText();
+        String chatId = String.valueOf(message.getChatId());
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(buildCommonButton());
-        switch (textClient){
-           case "/home":
-               sendMessage.setText("Hello Chairman Tien Tran, Welcome to TQT Manager BOT");
-               inlineKeyboardMarkup.getKeyboard().addAll(buildHomeButton());
-//               ArrayList<Update> chat = botNotification.getHistoryMessage(message.getChatId());
-               break;
-           default:
-               sendMessage.setText("Invalid Command, please choose option following");
-               List<Update> updateLits = updates.getListElement();
-               Update update1 = updateLits.get(updateLits.size() - 2);
-               System.out.println(updateLits.get(updateLits.size() - 2));
-               if (updateLits.get(updateLits.size() - 2).getCallbackQuery() != null){
-                   if (mapCheckProcess().contains(updateLits.get(updateLits.size() - 2).getCallbackQuery().getData())){
-                       botController.handlerProcess(updateLits, textClient);
-                   }
-               }
-
-
+        List<Update> updateList = updates.getListElement();
+        switch (textClient) {
+            case "/home":
+                sendMessage.setText("Hello Chairman Tien Tran, Welcome to TQT Manager BOT");
+                inlineKeyboardMarkup.getKeyboard().addAll(buildHomeButton());
+                break;
+            default:
+                if (isCallbackQueryPresent(updateList)) {
+                    boolean resultExecuted = botController.handlerProcess(updateList, textClient, this, chatId);
+                    if (resultExecuted) {
+                        return;
+                    }
+                }
+                sendMessage.setText("Invalid Command, please choose option following");
+                break;
         }
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
         botNotification.sendMessge(sendMessage);
     }
 
+    private boolean isCallbackQueryPresent(List<Update> updateList) {
+        Optional<String> callbackData = Optional.empty();
+        int[] indexes = { 2, 6 };
+        for (int index : indexes) {
+            if (updateList.size() >= index) {
+                Update update = updateList.get(updateList.size() - index);
+                callbackData = Optional.ofNullable(update.getCallbackQuery())
+                        .map(CallbackQuery::getData);
+                if (callbackData.isPresent() && mapCheckProcess().contains(callbackData.get())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 
 
-   public List<List<InlineKeyboardButton>> buildCommonButton() {
+
+    public List<List<InlineKeyboardButton>> buildCommonButton() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         InlineKeyboardButton b1 = new InlineKeyboardButton();
@@ -178,16 +238,4 @@ public class BotNotificationService {
         return keyboard;
     }
 
-
-    public SheetsService getSheetsService() {
-        return sheetsService;
-    }
-
-    public String getInfoAppMapPram(){
-        AppInfo appInfo =  appInfoRepository.findByAppCode("MAP");
-        LocalDate localDate = LocalDate.now();
-        Date date = java.sql.Date.valueOf(localDate);
-        long count = requetsAppRepository.countByRequestDate(date);
-        return appInfo.toString() + "Request today: " + count;
-    }
 }
