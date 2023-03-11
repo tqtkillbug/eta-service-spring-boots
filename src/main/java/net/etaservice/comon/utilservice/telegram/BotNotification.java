@@ -45,7 +45,7 @@ public class BotNotification extends TelegramLongPollingBot {
         if (update.hasCallbackQuery()) {
          this.notificationService.handlerCallbackQuery(update);
         } else  if (update.hasMessage() && update.getMessage().hasText()) {
-          this.notificationService.hanlderMessageReceive(update);
+          this.notificationService.handleMessageReceive(update);
         }
     }
 

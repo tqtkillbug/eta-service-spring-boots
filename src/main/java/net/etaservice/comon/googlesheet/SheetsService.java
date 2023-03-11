@@ -12,6 +12,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -34,6 +35,9 @@ public class SheetsService {
 
     @Value("${sheetapi.credentials.path}")
     private String CREDENTIALS_FILE_PATH;
+
+    @Value("${sheetapi.spreadsheet.id}")
+    private String spreadsheetId;
 
     private static final List<String> SCOPES =
             Collections.singletonList(SheetsScopes.SPREADSHEETS);
@@ -65,6 +69,19 @@ public class SheetsService {
                         .setApplicationName(APPLICATION_NAME)
                         .build();
         return service;
+    }
+
+    public ValueRange getDataSheet(String range) throws GeneralSecurityException, IOException {
+        return service().spreadsheets().values()
+                .get(spreadsheetId, range)
+                .execute();
+    }
+
+    public UpdateValuesResponse inserData(String range, ValueRange body) throws GeneralSecurityException, IOException {
+        return service().spreadsheets().values()
+                .update(spreadsheetId, range, body)
+                .setValueInputOption("USER_ENTERED")
+                .execute();
     }
 
 }
