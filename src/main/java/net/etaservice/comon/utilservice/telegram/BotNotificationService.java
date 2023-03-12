@@ -12,6 +12,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -70,13 +71,14 @@ public class BotNotificationService {
         mapCallBackButton.put("about","About BOT");
         mapCallBackButton.put("personalFinance","Manage personal finance");
         mapCallBackButton.put("utiltools","Util Tools");
-        mapCallBackButton.put("currBalance","Current account balance");
+        mapCallBackButton.put("wallets","Wallets");
         mapCallBackButton.put("spendingThisMonth","Total spending this month");
-        mapCallBackButton.put("statistic","Statistics Financial");
+        mapCallBackButton.put("statistic","Analysis");
         mapCallBackButton.put("insertspending","Insert Spending");
         mapCallBackButton.put("addNote","Thêm ghi chú");
         mapCallBackButton.put("submitSpending","Submit");
         mapCallBackButton.put("cancelSpending","Cancel");
+        mapCallBackButton.put("listSpending","List Spending");
         return  mapCallBackButton;
     }
     public static Map<String,String> mapSpendingType(){
@@ -108,6 +110,19 @@ public class BotNotificationService {
         return  mapSourceSpendingCallBack;
     }
 
+    public static Map<String,String> mapSourceSpendingAction(){
+        Map<String,String> m = new HashMap<>();
+        m.put("deposit","Deposit");
+        m.put("withdraw","Withdraw");
+        return m;
+    }
+
+    public static Map<String,String> mapOptionsListSpend(){
+        Map<String,String> m = new HashMap<>();
+        m.put("todaySpendings","Today");
+        return m;
+    }
+
     public static List<String> mapCheckProcess(){
        List<String> strings = new ArrayList<>();
        strings.add("insertspending");
@@ -126,6 +141,10 @@ public class BotNotificationService {
         botNotification.sendMessge(message);
     }
 
+    public void sendTranferPhoto(SendPhoto sendPhoto){
+        botNotification.sendPhoto(sendPhoto);
+    }
+
     public void handlerCallbackQuery(Update callbackQuery) throws Exception {
         addUpdate(callbackQuery);
         List<Update> updateList = updates.getListElement();
@@ -136,11 +155,17 @@ public class BotNotificationService {
         SendMessage message = new SendMessage();
         message.setChatId(fromId);
 
-        if (!mapCallBackButton().containsKey(data)) {
+        if (!mapCallBackButton().containsKey(data) && !mapOptionsListSpend().containsKey(data)) {
+
+            if (data.split(":").length > 1){
+                annotationHandler.callMethodByAnoBotCallBack(data.split(":")[0], fromId, callbackQuery);
+                return;
+            }
+
             int[] indices = {3, 4};
             for (int i : indices) {
                 if (updateList.size() > i && updateList.get(updateList.size() - i).getCallbackQuery() != null && mapCheckProcess().contains(updateList.get(updateList.size() - i).getCallbackQuery().getData())) {
-                    boolean resultExecute = botController.handlerProcess(updateList, "", this, chatId);
+                    boolean resultExecute = botController.handleSpendingProcess(updateList, "", this, chatId);
                     if (resultExecute) return;
                 }
             }
@@ -149,7 +174,7 @@ public class BotNotificationService {
             return;
         }
 
-        annotationHandler.callMethodByAnoBotCallBack(data, fromId);
+        annotationHandler.callMethodByAnoBotCallBack(data, fromId, callbackQuery);
     }
 
     public void handleMessageReceive(Update update) throws Exception {
@@ -168,8 +193,15 @@ public class BotNotificationService {
                 inlineKeyboardMarkup.getKeyboard().addAll(buildHomeButton());
                 break;
             default:
-                if (isCallbackQueryPresent(updateList)) {
-                    boolean resultExecuted = botController.handlerProcess(updateList, textClient, this, chatId);
+                if (isCallbackQuerySpendingProcess(updateList)) {
+                    boolean resultExecuted = botController.handleSpendingProcess(updateList, textClient, this, chatId);
+                    if (resultExecuted) {
+                        return;
+                    }
+                }
+
+                if (isCallbackQuerySoureSpendingAction(updateList)) {
+                    boolean resultExecuted = botController.handleActionSourceSpendingProcess(updateList, textClient, this, chatId);
                     if (resultExecuted) {
                         return;
                     }
@@ -181,7 +213,7 @@ public class BotNotificationService {
         botNotification.sendMessge(sendMessage);
     }
 
-    private boolean isCallbackQueryPresent(List<Update> updateList) {
+    private boolean isCallbackQuerySpendingProcess(List<Update> updateList) {
         Optional<String> callbackData = Optional.empty();
         int[] indexes = { 2, 6 };
         for (int index : indexes) {
@@ -192,6 +224,20 @@ public class BotNotificationService {
                 if (callbackData.isPresent() && mapCheckProcess().contains(callbackData.get())) {
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean isCallbackQuerySoureSpendingAction(List<Update> updateList) {
+        int[] indices = {2};
+        for (int i : indices) {
+            String callBackData = updateList.get(updateList.size() - i).getCallbackQuery().getData();
+            if (callBackData.split(":").length < 2){
+                return false;
+            }
+            if (updateList.size() > i && updateList.get(updateList.size() - i).getCallbackQuery() != null && mapSourceSpendingAction().containsKey(callBackData.split(":")[0])) {
+                return true;
             }
         }
         return false;
