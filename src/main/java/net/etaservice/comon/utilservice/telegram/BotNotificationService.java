@@ -141,6 +141,9 @@ public class BotNotificationService {
         botNotification.sendMessge(message);
     }
 
+    public void sendTranferPhoto(SendPhoto sendPhoto){
+        botNotification.sendPhoto(sendPhoto);
+    }
 
     public void handlerCallbackQuery(Update callbackQuery) throws Exception {
         addUpdate(callbackQuery);
