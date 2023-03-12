@@ -12,6 +12,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import org.springframework.beans.factory.annotation.Value;
@@ -76,6 +77,27 @@ public class SheetsService {
                 .get(spreadsheetId, range)
                 .execute();
     }
+
+    public ValueRange getDataSheetWithFormula(String range) throws GeneralSecurityException, IOException {
+        Sheets.Spreadsheets.Values.Get request =
+                service().spreadsheets().values().get(spreadsheetId, range);
+        request.setValueRenderOption("FORMULA");
+        return request.execute();
+    }
+
+    public Sheet getSheetByName(String sheetName) throws GeneralSecurityException, IOException {
+        List<Sheet> sheets = service().spreadsheets().get(spreadsheetId).execute().getSheets();
+        Sheet sheet = null;
+        for (Sheet s : sheets) {
+            if (s.getProperties().getTitle().equals(sheetName)) {
+                sheet = s;
+                break;
+            }
+        }
+        return sheet;
+    }
+
+
 
     public UpdateValuesResponse inserData(String range, ValueRange body) throws GeneralSecurityException, IOException {
         return service().spreadsheets().values()
