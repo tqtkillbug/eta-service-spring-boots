@@ -6,6 +6,7 @@ import net.etaservice.appmanager.model.RequestApp;
 import net.etaservice.appmanager.model.dto.AppInfoDTO;
 import net.etaservice.appmanager.repository.AppInfoRepository;
 import net.etaservice.appmanager.repository.RequetsAppRepository;
+import net.etaservice.configapp.metric.ApiMetrics;
 import net.etaservice.crawnew.model.New;
 import net.etaservice.crawnew.repository.NewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -27,9 +27,12 @@ public class RequestAPIController {
     @Autowired
     private AppInfoRepository appInfoRepository;
 
-
     @Autowired
     private NewRepository newRepository;
+
+    @Autowired
+    private ApiMetrics apiMetrics;
+
 
     @CrossOrigin
     @PostMapping("/ping")
@@ -37,12 +40,8 @@ public class RequestAPIController {
         String response = "";
         if (requestApp == null) {
         } else {
-            RequestApp requestAppSave = new RequestApp();
-            requestAppSave.setRequestDate(new Date());
-            requestAppSave.setAppName(requestApp.getAppName());
-            requestAppSave.setIpAddress(requestApp.getIpAddress());
-            requetsAppRepository.saveAndFlush(requestAppSave);
             if (requestApp.getAppName() != null){
+                apiMetrics.increaseCount("api/v1/free/app/ping/" +requestApp.getAppName());
                 AppInfo appInfo = appInfoRepository.findByAppCode(requestApp.getAppName());
                 if (appInfo != null){
                     AppInfoDTO appInfoDTO = appInfo.toDTO();
@@ -65,6 +64,7 @@ public class RequestAPIController {
     @CrossOrigin
     @GetMapping("/news/last")
     public String getListNewsLast(){
+        apiMetrics.increaseCount("api/v1/free/app/news/last");
         List<New> newList = new ArrayList<>();
         newList = newRepository.getListNewLastByLimit(5);
         Collections.shuffle(newList);
