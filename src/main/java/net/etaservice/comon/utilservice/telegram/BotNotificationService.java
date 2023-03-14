@@ -141,7 +141,6 @@ public class BotNotificationService {
         botNotification.sendMessge(message);
     }
 
-
     public void handlerCallbackQuery(Update callbackQuery) throws Exception {
         addUpdate(callbackQuery);
         List<Update> updateList = updates.getListElement();
