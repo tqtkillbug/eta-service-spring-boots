@@ -1,11 +1,13 @@
 package net.etaservice.comon.utilservice.telegram;
 
-import net.etaservice.appmanager.model.AppInfo;
 import net.etaservice.appmanager.repository.AppInfoRepository;
 import net.etaservice.appmanager.repository.RequetsAppRepository;
 import net.etaservice.comon.domain.LimitedQueue;
+import net.etaservice.comon.googlesheet.ISheetService;
 import net.etaservice.comon.googlesheet.SheetsService;
 import net.etaservice.comon.utilservice.telegram.customanotation.AnnotationHandler;
+import net.etaservice.comon.utilservice.telegram.customanotation.BotRoute;
+import net.etaservice.comon.utilservice.telegram.route.FinanceRoute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -25,7 +27,7 @@ import java.util.*;
 @Component
 @PropertySource("application-${spring.profiles.active}.properties")
 @EnableConfigurationProperties
-public class BotNotificationService {
+public class BotNotificationServiceCommon {
 
 
     @Autowired
@@ -41,10 +43,10 @@ public class BotNotificationService {
     private BotNotification botNotification;
 
     @Autowired
-    private SheetsService sheetsService;
+    private ISheetService sheetsService;
 
     @Autowired
-    private BotController botController;
+    private FinanceRoute financeRoute;
 
 
     @Value("${telegram.bot.username}")
@@ -57,30 +59,64 @@ public class BotNotificationService {
     public static LimitedQueue<Update> updates = new LimitedQueue<>(10);
 
 
-    public SheetsService getSheetsService() {
+    public ISheetService getSheetsService() {
         return sheetsService;
     }
 
-   public static Map<String,String> mapCallBackButton(){
+    public static Map<String,String> commonCallBack(){
         Map<String,String> mapCallBackButton = new HashMap<>();
-        mapCallBackButton.put("home","Home");
-        mapCallBackButton.put("appList","App List Manager");
-        mapCallBackButton.put("chatGpt","Chat GPT");
-        mapCallBackButton.put("infoMap","Get Info Mapparam App");
-        mapCallBackButton.put("infoGenAcc","Get Info Generator Account App");
-        mapCallBackButton.put("about","About BOT");
-        mapCallBackButton.put("personalFinance","Manage personal finance");
-        mapCallBackButton.put("utiltools","Util Tools");
-        mapCallBackButton.put("wallets","Wallets");
-        mapCallBackButton.put("spendingThisMonth","Total spending this month");
-        mapCallBackButton.put("statistic","Analysis");
-        mapCallBackButton.put("insertspending","Insert Spending");
-        mapCallBackButton.put("addNote","Thêm ghi chú");
-        mapCallBackButton.put("submitSpending","Submit");
-        mapCallBackButton.put("cancelSpending","Cancel");
-        mapCallBackButton.put("listSpending","List Spending");
+        mapCallBackButton.putAll(mapCallBackHome);
+        mapCallBackButton.remove("appList");
+        mapCallBackButton.remove("about");
+        mapCallBackButton.remove("utiltools");
+        mapCallBackButton.remove("personalFinance");
+        return  mapCallBackButton;
+
+    }
+
+    public static Map<String,String> mapCallBackHome = new HashMap<>();;
+    static {
+        mapCallBackHome.put("home","Home");
+        mapCallBackHome.put("appList","Apps Manager");
+        mapCallBackHome.put("about","About BOT");
+        mapCallBackHome.put("personalFinance","Finance");
+        mapCallBackHome.put("utiltools","Util Tools");
+    }
+
+    public static Map<String,String> mapCallBackFinance = new HashMap<>();
+    static {
+        mapCallBackFinance.put("wallets","Wallets");
+        mapCallBackFinance.put("statistic","Analysis");
+        mapCallBackFinance.put("insertspending","Insert Spending");
+        mapCallBackFinance.put("addNote","Add Note");
+        mapCallBackFinance.put("submitSpending","Submit");
+        mapCallBackFinance.put("cancelSpending","Cancel");
+        mapCallBackFinance.put("listSpending","List Spending");
+    }
+
+    public static Map<String,String> mapCallBackManaApps = new HashMap<>();;
+    static {
+        mapCallBackManaApps.put("mapparam","Mapparam");
+        mapCallBackManaApps.put("genaccounts","Generator Account");
+        mapCallBackManaApps.put("newsDay","News Day");
+    }
+
+    public static Map<String,String> mapCallBackManaAppsAction = new HashMap<>();;
+    static {
+        mapCallBackManaAppsAction.put("countRequest","Count Request");
+    }
+
+
+    public static Map<String,String> mergedMapCallBack(){
+        Map<String,String> mapCallBackButton = new HashMap<>();
+        mapCallBackButton.putAll(mapCallBackHome);
+        mapCallBackButton.putAll(mapCallBackFinance);
+        mapCallBackButton.putAll(mapCallBackManaApps);
         return  mapCallBackButton;
     }
+
+
+
     public static Map<String,String> mapSpendingType(){
         Map<String,String> mapSpendingTypeCallBack = new HashMap<>();
         mapSpendingTypeCallBack.put("anuong","Ăn uống");
@@ -151,7 +187,7 @@ public class BotNotificationService {
         SendMessage message = new SendMessage();
         message.setChatId(fromId);
 
-        if (!mapCallBackButton().containsKey(data) && !mapOptionsListSpend().containsKey(data)) {
+        if (!mergedMapCallBack().containsKey(data) && !mapOptionsListSpend().containsKey(data)) {
 
             if (data.split(":").length > 1){
                 annotationHandler.callMethodByAnoBotCallBack(data.split(":")[0], fromId, callbackQuery);
@@ -161,7 +197,7 @@ public class BotNotificationService {
             int[] indices = {3, 4};
             for (int i : indices) {
                 if (updateList.size() > i && updateList.get(updateList.size() - i).getCallbackQuery() != null && mapCheckProcess().contains(updateList.get(updateList.size() - i).getCallbackQuery().getData())) {
-                    boolean resultExecute = botController.handleSpendingProcess(updateList, "", this, chatId);
+                    boolean resultExecute = financeRoute.handleSpendingProcess(updateList, "", this, chatId);
                     if (resultExecute) return;
                 }
             }
@@ -190,14 +226,14 @@ public class BotNotificationService {
                 break;
             default:
                 if (isCallbackQuerySpendingProcess(updateList)) {
-                    boolean resultExecuted = botController.handleSpendingProcess(updateList, textClient, this, chatId);
+                    boolean resultExecuted = financeRoute.handleSpendingProcess(updateList, textClient, this, chatId);
                     if (resultExecuted) {
                         return;
                     }
                 }
 
                 if (isCallbackQuerySoureSpendingAction(updateList)) {
-                    boolean resultExecuted = botController.handleActionSourceSpendingProcess(updateList, textClient, this, chatId);
+                    boolean resultExecuted = financeRoute.handleActionSourceSpendingProcess(updateList, textClient, this, chatId);
                     if (resultExecuted) {
                         return;
                     }
@@ -240,20 +276,43 @@ public class BotNotificationService {
     }
 
 
+    public List<List<InlineKeyboardButton>> createInlineKeyboard(Map<String, String> buttonMap, Map<String, String> optionsMap) {
+        int rows = (int) Math.ceil(buttonMap.size() / 3.0);
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        int count = 0;
+        for (int i = 0; i < rows; i++) {
+            List<InlineKeyboardButton> row = new ArrayList<>();
+            for (int j = 0; j < 3; j++) {
+                if (count >= buttonMap.size()) {
+                    break;
+                }
+                String key = (String) buttonMap.keySet().toArray()[count];
+                String value = buttonMap.get(key);
+                InlineKeyboardButton button = new InlineKeyboardButton();
+                button.setText(value);
+                button.setCallbackData(key);
+                row.add(button);
+                count++;
+            }
+            keyboard.add(row);
+        }
+        if (optionsMap != null) {
+            List<List<InlineKeyboardButton>> optionButton = createInlineKeyboard(optionsMap, null);
+            keyboard.addAll(optionButton);
+        }
+        return keyboard;
+    }
 
 
-    public List<List<InlineKeyboardButton>> buildCommonButton() {
+
+    public static List<List<InlineKeyboardButton>> buildCommonButton() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         InlineKeyboardButton b1 = new InlineKeyboardButton();
-        Map<String, String> callBackMap = mapCallBackButton();
+        Map<String, String> callBackMap = commonCallBack();
         b1.setText(callBackMap.get("home"));
         b1.setCallbackData("home");
-        InlineKeyboardButton b2 = new InlineKeyboardButton();
-        b2.setText(callBackMap.get("about"));
-        b2.setCallbackData("about");
         row1.add(b1);
-        row1.add(b2);
         keyboard.add(row1);
         return keyboard;
     }
@@ -263,7 +322,7 @@ public class BotNotificationService {
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         List<InlineKeyboardButton> row2 = new ArrayList<>();
         InlineKeyboardButton b1 = new InlineKeyboardButton();
-        Map<String, String> callBackMap = mapCallBackButton();
+        Map<String, String> callBackMap = mergedMapCallBack();
         b1.setText(callBackMap.get("appList"));
         b1.setCallbackData("appList");
         InlineKeyboardButton b2 = new InlineKeyboardButton();
@@ -279,5 +338,6 @@ public class BotNotificationService {
         keyboard.add(row2);
         return keyboard;
     }
+
 
 }

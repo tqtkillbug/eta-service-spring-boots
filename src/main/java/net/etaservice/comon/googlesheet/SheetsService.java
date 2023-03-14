@@ -15,6 +15,7 @@ import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
@@ -28,7 +29,7 @@ import java.util.List;
 @Service
 @PropertySource("application-${spring.profiles.active}.properties")
 @EnableConfigurationProperties
-public class SheetsService {
+public class SheetsService implements ISheetService {
     private static final String APPLICATION_NAME = "ETASERVICE SHEET API";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     @Value("${sheetapi.tokens.path}")
@@ -62,8 +63,9 @@ public class SheetsService {
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
-
-    public Sheets service() throws GeneralSecurityException, IOException {
+    @SneakyThrows
+    @Override
+    public Sheets service()  {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Sheets service =
                 new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
@@ -72,13 +74,17 @@ public class SheetsService {
         return service;
     }
 
-    public ValueRange getDataSheet(String range) throws GeneralSecurityException, IOException {
+    @SneakyThrows
+    @Override
+    public ValueRange getDataSheet(String range)  {
         return service().spreadsheets().values()
                 .get(spreadsheetId, range)
                 .execute();
     }
 
-    public ValueRange getDataSheetWithFormula(String range) throws GeneralSecurityException, IOException {
+    @SneakyThrows
+    @Override
+    public ValueRange getDataSheetWithFormula(String range)  {
         Sheets.Spreadsheets.Values.Get request =
                 service().spreadsheets().values().get(spreadsheetId, range);
         request.setValueRenderOption("FORMULA");
@@ -98,8 +104,9 @@ public class SheetsService {
     }
 
 
-
-    public UpdateValuesResponse inserData(String range, ValueRange body) throws GeneralSecurityException, IOException {
+    @SneakyThrows
+    @Override
+    public UpdateValuesResponse inserData(String range, ValueRange body) {
         return service().spreadsheets().values()
                 .update(spreadsheetId, range, body)
                 .setValueInputOption("USER_ENTERED")

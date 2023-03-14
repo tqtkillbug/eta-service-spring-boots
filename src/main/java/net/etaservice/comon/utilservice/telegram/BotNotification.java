@@ -27,7 +27,7 @@ import java.util.List;
 public class BotNotification extends TelegramLongPollingBot {
 
     @Autowired
-    private BotNotificationService notificationService;
+    private BotNotificationServiceCommon notificationService;
 
     @Override
     public String getBotUsername() {
@@ -57,25 +57,6 @@ public class BotNotification extends TelegramLongPollingBot {
            e.printStackTrace();
        }
    }
-
-   public ArrayList<Update> getHistoryMessage(Long chatId){
-       GetChat chat = new GetChat(String.valueOf(chatId));
-       GetUpdates getUpdates = new GetUpdates();
-       List<String> strings = new ArrayList<>();
-       strings.add("message");
-       strings.add("callback_query");
-       getUpdates.setAllowedUpdates(strings);
-       try {
-           ArrayList<Update> messages = execute(getUpdates);
-
-           return new ArrayList<Update>();
-       } catch (TelegramApiException e) {
-           e.printStackTrace();
-       }
-       return null;
-   }
-
-
 
 
 }
