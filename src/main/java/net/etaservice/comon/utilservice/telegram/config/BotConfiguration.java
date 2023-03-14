@@ -1,5 +1,6 @@
-package net.etaservice.comon.utilservice.telegram;
+package net.etaservice.comon.utilservice.telegram.config;
 
+import net.etaservice.comon.utilservice.telegram.BotNotification;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.meta.TelegramBotsApi;

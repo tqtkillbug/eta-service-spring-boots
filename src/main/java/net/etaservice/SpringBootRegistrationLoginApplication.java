@@ -26,14 +26,11 @@ public class SpringBootRegistrationLoginApplication extends SpringBootServletIni
 		SpringApplication.run(SpringBootRegistrationLoginApplication.class, args);
 
 	}
-	@Value("${telegram.bot.username}")
-	public static String userName;
 
 	@Bean
 	@Profile("dev")
 	public String dev() {
 		System.out.println("Running development environment");
-		System.out.println(userName);
 		return "dev";
 	}
 	@Bean
