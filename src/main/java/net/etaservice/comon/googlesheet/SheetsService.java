@@ -15,6 +15,7 @@ import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import com.google.api.services.tasks.TasksScopes;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,11 +43,11 @@ public class SheetsService implements ISheetService {
     @Value("${sheetapi.spreadsheet.id}")
     private String spreadsheetId;
 
-    private static final List<String> SCOPES =
-            Collections.singletonList(SheetsScopes.SPREADSHEETS);
+    private static final List<String> SCOPES = Arrays.asList(SheetsScopes.SPREADSHEETS, TasksScopes.TASKS);
 
 
-    private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
+    @Override
+    public Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
             throws IOException {
         InputStream in = new FileInputStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
