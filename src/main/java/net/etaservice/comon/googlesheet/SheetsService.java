@@ -17,6 +17,8 @@ import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.api.services.tasks.TasksScopes;
 import lombok.SneakyThrows;
+import net.etaservice.comon.google.GoogleCendentials;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
@@ -32,45 +34,24 @@ import java.util.List;
 @PropertySource("application-${spring.profiles.active}.properties")
 @EnableConfigurationProperties
 public class SheetsService implements ISheetService {
-    private static final String APPLICATION_NAME = "ETASERVICE SHEET API";
-    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    @Value("${sheetapi.tokens.path}")
-    private String TOKENS_DIRECTORY_PATH;
 
-    @Value("${sheetapi.credentials.path}")
-    private String CREDENTIALS_FILE_PATH;
+
+    @Autowired
+    private GoogleCendentials googleCendentials;
 
     @Value("${sheetapi.spreadsheet.id}")
     private String spreadsheetId;
 
-    private static final List<String> SCOPES = Arrays.asList(SheetsScopes.SPREADSHEETS, TasksScopes.TASKS);
+    private static final String APPLICATION_NAME = "ETASERVICE SHEET API";
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
 
-    @Override
-    public Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
-            throws IOException {
-        InputStream in = new FileInputStream(CREDENTIALS_FILE_PATH);
-        if (in == null) {
-            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
-        }
-        GoogleClientSecrets clientSecrets =
-                GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
-        // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-                .setAccessType("offline")
-                .build();
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
-    }
     @SneakyThrows
     @Override
     public Sheets service()  {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Sheets service =
-                new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, googleCendentials.getCredentials())
                         .setApplicationName(APPLICATION_NAME)
                         .build();
         return service;
