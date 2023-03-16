@@ -24,7 +24,7 @@ public class AnnotationHandler {
     @Autowired
     ApplicationContext applicationContext;
 
-    public void callMethodByAnoBotCallBack(String name, Long chatId, Update update) throws Exception {
+    public boolean callMethodByAnoBotCallBack(String name, Long chatId, Update update) throws Exception {
         List<Method> methods = getListMethodBotRoute();
         for (Method method : methods) {
             try {
@@ -33,14 +33,16 @@ public class AnnotationHandler {
                 if (name.equals(botCallBack.name())) {
                         Object beanInstance = applicationContext.getBean(method.getDeclaringClass());
                         method.invoke(beanInstance,notificationServiceCommon,chatId,update);
-                        return;
+                        return true;
                 }
             }
             } catch (Exception e) {
                 e.printStackTrace();
                 log.error("Method not found");
+                return false;
             }
         }
+        return false;
     }
 
     public List<Method> getListMethodBotRoute(){

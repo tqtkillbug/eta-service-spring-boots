@@ -146,6 +146,12 @@ public class BotNotificationServiceCommon {
         return  mapSourceSpendingCallBack;
     }
 
+    public static Map<String,String> mapCommand= new HashMap<>();
+    static {
+        mapCommand.put("/newtask", "");
+        mapCommand.put("/tasks", "");
+    }
+
     public static Map<String,String> mapSourceSpendingAction(){
         Map<String,String> m = new HashMap<>();
         m.put("deposit","Deposit");
@@ -237,6 +243,11 @@ public class BotNotificationServiceCommon {
                     if (resultExecuted) {
                         return;
                     }
+                }
+                String comandHandler = handlerComandToCB(textClient);
+                if (!comandHandler.isEmpty()){
+                   boolean isHandled =  annotationHandler.callMethodByAnoBotCallBack(comandHandler,message.getChatId(),update);
+                   if (isHandled) return;
                 }
                 sendMessage.setText("Invalid Command, please choose option following");
                 break;
@@ -337,6 +348,17 @@ public class BotNotificationServiceCommon {
         row2.add(b12);
         keyboard.add(row2);
         return keyboard;
+    }
+
+    private String handlerComandToCB(String command){
+        if (command.indexOf("/") == 0){
+            String[] sp = command.trim().split(" ");
+            if (sp.length > 1){
+                String callBack = sp[0].replace("/","").trim();
+                return callBack;
+            }
+        }
+        return "";
     }
 
 
