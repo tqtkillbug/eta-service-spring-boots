@@ -146,6 +146,13 @@ public class BotNotificationServiceCommon {
         return  mapSourceSpendingCallBack;
     }
 
+    public static Map<String,String> mapCommand= new HashMap<>();
+    static {
+        mapCommand.put("/newtask", "");
+        mapCommand.put("/tasks", "");
+        mapCommand.put("/tasksmap", "");
+    }
+
     public static Map<String,String> mapSourceSpendingAction(){
         Map<String,String> m = new HashMap<>();
         m.put("deposit","Deposit");
@@ -238,6 +245,11 @@ public class BotNotificationServiceCommon {
                         return;
                     }
                 }
+                String comandHandler = handlerComandToCB(textClient);
+                if (!comandHandler.isEmpty()){
+                   boolean isHandled =  annotationHandler.callMethodByAnoBotCallBack(comandHandler,message.getChatId(),update);
+                   if (isHandled) return;
+                }
                 sendMessage.setText("Invalid Command, please choose option following");
                 break;
         }
@@ -264,6 +276,9 @@ public class BotNotificationServiceCommon {
     private boolean isCallbackQuerySoureSpendingAction(List<Update> updateList) {
         int[] indices = {2};
         for (int i : indices) {
+            if (updateList.size()-1 < i) continue;
+            if (updateList.get(updateList.size() - i) == null) continue;
+            if (updateList.get(updateList.size() - i).getCallbackQuery() == null) continue;
             String callBackData = updateList.get(updateList.size() - i).getCallbackQuery().getData();
             if (callBackData.split(":").length < 2){
                 return false;
@@ -337,6 +352,20 @@ public class BotNotificationServiceCommon {
         row2.add(b12);
         keyboard.add(row2);
         return keyboard;
+    }
+
+    private String handlerComandToCB(String command){
+        if (command.indexOf("/") == 0){
+            String[] sp = command.trim().split(" ");
+            if (sp.length > 1){
+                String callBack = sp[0].replace("/","").trim();
+                if (callBack.trim().split("-").length > 1){
+                    callBack = callBack.trim().split("-")[0];
+                }
+                return callBack;
+            }
+        }
+        return "";
     }
 
 

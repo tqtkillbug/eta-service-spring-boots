@@ -29,7 +29,6 @@ public class BotNotification extends TelegramLongPollingBot {
     @Autowired
     private BotNotificationServiceCommon notificationService;
 
-    @Override
     public String getBotUsername() {
         return "tqtmanager_bot";
     }

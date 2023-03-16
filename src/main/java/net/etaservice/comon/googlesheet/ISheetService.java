@@ -13,8 +13,6 @@ import java.security.GeneralSecurityException;
 
 @Service
 public interface ISheetService {
-    Credential getCredentials(NetHttpTransport HTTP_TRANSPORT)
-            throws IOException;
 
     Sheets service() throws GeneralSecurityException, IOException;
 
