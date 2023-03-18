@@ -35,33 +35,6 @@ public class TaskService {
 
 
     @SneakyThrows
-//    @Scheduled(initialDelay = 1000, fixedDelay=5000)
-    public void testGetTask(){
-        // Print the first 10 task lists.
-        long startTime = System.currentTimeMillis();
-
-
-        String taskListTestId= "MTU4MjExNTU0Nzg0MTczMzQyODk6MDow";
-        Tasks.TasksOperations.List request = taskSerive().tasks().list(taskListTestId);
-        List<Task> tasksList = request.execute().getItems();
-        for(Task t : tasksList){
-            System.out.println(t.toString());
-        }
-
-        //test insert new task
-        Task task = new Task();
-        task.setTitle("Task insert by API" +System.currentTimeMillis());
-        task.setNotes("Task notes insert by API");
-        Task taskIs = taskSerive().tasks().insert(taskListTestId, task).execute();
-        System.out.println(taskIs);
-        long endTime = System.currentTimeMillis();
-        double elapsedTime = (endTime - startTime) / 1000.0;
-        System.out.println("Thời gian thực thi của hàm là " + elapsedTime + " giây.");
-
-
-    }
-
-    @SneakyThrows
     public Tasks taskSerive(){
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Credential credential = googleCendentials.getCredentials();
@@ -121,6 +94,17 @@ public class TaskService {
         } catch (IOException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public List<Task> getListTaskByTaskListId(String taskListTestId){
+        Tasks.TasksOperations.List request = null;
+        try {
+            request = taskSerive().tasks().list(taskListTestId);
+            return request.execute().getItems();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
         }
     }
 
