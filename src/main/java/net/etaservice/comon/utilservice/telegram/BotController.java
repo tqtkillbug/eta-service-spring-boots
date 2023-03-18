@@ -35,6 +35,8 @@ import java.util.*;
 @BotRoute
 public class BotController {
 
+    @Autowired
+    private BotNotificationServiceCommon serviceCommon;
 
 
 
@@ -64,6 +66,19 @@ public class BotController {
         inlineKeyboardMarkup.setKeyboard(BotNotificationServiceCommon.buildCommonButton());
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
         BotNotificationServiceCommon.sendTranferMessage(sendMessage);
+    }
+
+    @BotCallBack(name = "workspaces")
+    public void loadWorkSpace(BotNotificationServiceCommon botNotificationServiceCommon, Long chatId, Update updateParam){
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setText("Choose work spaces:");
+        sendMessage.setChatId(chatId);
+        sendMessage.setParseMode(ParseMode.HTML);
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(serviceCommon.createInlineKeyboard(BotNotificationServiceCommon.mapWorkspaceCallBack,null));
+        inlineKeyboardMarkup.getKeyboard().addAll(BotNotificationServiceCommon.buildCommonButton());
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+        serviceCommon.sendTranferMessage(sendMessage);
     }
 
 

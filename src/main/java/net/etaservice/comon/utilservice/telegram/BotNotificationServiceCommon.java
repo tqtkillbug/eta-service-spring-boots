@@ -81,6 +81,7 @@ public class BotNotificationServiceCommon {
         mapCallBackHome.put("about","About BOT");
         mapCallBackHome.put("personalFinance","Finance");
         mapCallBackHome.put("utiltools","Util Tools");
+        mapCallBackHome.put("workspaces","Work Spaces");
     }
 
     public static Map<String,String> mapCallBackFinance = new HashMap<>();
@@ -112,6 +113,8 @@ public class BotNotificationServiceCommon {
         mapCallBackButton.putAll(mapCallBackHome);
         mapCallBackButton.putAll(mapCallBackFinance);
         mapCallBackButton.putAll(mapCallBackManaApps);
+        mapCallBackButton.putAll(mapWorkspaceCallBack);
+        mapCallBackButton.putAll(mapActionTaskCallBack);
         return  mapCallBackButton;
     }
 
@@ -152,6 +155,21 @@ public class BotNotificationServiceCommon {
         mapCommand.put("/tasks", "");
         mapCommand.put("/tasksmap", "");
     }
+
+    public static Map<String,String> mapWorkspaceCallBack = new HashMap<>();
+    static {
+        mapWorkspaceCallBack.put("workTask", "Task");
+        mapWorkspaceCallBack.put("workKeepNote", "Keep Note");
+    }
+
+    public static Map<String,String> mapActionTaskCallBack = new LinkedHashMap<>(){
+    };
+    static {
+        mapActionTaskCallBack.put("newTaskStep1", "Insert Task");
+        mapActionTaskCallBack.put("newTaskStep2", "Insert Task 2");
+        mapActionTaskCallBack.put("listTaskList", "List Task List");
+    }
+
 
     public static Map<String,String> mapSourceSpendingAction(){
         Map<String,String> m = new HashMap<>();
@@ -245,6 +263,11 @@ public class BotNotificationServiceCommon {
                         return;
                     }
                 }
+                if (isCallbackInertTaskProcess(updateList)) {
+                    boolean isHandled =  annotationHandler.callMethodByAnoBotCallBack("newtask",message.getChatId(),update);
+                    if (isHandled) return;
+                }
+
                 String comandHandler = handlerComandToCB(textClient);
                 if (!comandHandler.isEmpty()){
                    boolean isHandled =  annotationHandler.callMethodByAnoBotCallBack(comandHandler,message.getChatId(),update);
@@ -272,6 +295,29 @@ public class BotNotificationServiceCommon {
         }
         return false;
     }
+
+
+    private boolean isCallbackInertTaskProcess(List<Update> updateList) {
+        Optional<String> callbackData = Optional.empty();
+        int[] indexes = { 2};
+        for (int index : indexes) {
+            if (updateList.size() >= index) {
+                Update update = updateList.get(updateList.size() - index);
+                callbackData = Optional.ofNullable(update.getCallbackQuery())
+                        .map(CallbackQuery::getData);
+                try {
+                    String functionId = callbackData.get().trim().split(":")[0];
+                    if (mapActionTaskCallBack.containsKey(functionId)) {
+                        return true;
+                    }
+                } catch (Exception e){
+                    continue;
+                }
+            }
+        }
+        return false;
+    }
+
 
     private boolean isCallbackQuerySoureSpendingAction(List<Update> updateList) {
         int[] indices = {2};
@@ -338,17 +384,21 @@ public class BotNotificationServiceCommon {
         List<InlineKeyboardButton> row2 = new ArrayList<>();
         InlineKeyboardButton b1 = new InlineKeyboardButton();
         Map<String, String> callBackMap = mergedMapCallBack();
-        b1.setText(callBackMap.get("appList"));
-        b1.setCallbackData("appList");
+        b1.setText(callBackMap.get("personalFinance"));
+        b1.setCallbackData("personalFinance");
         InlineKeyboardButton b2 = new InlineKeyboardButton();
-        b2.setText(callBackMap.get("personalFinance"));
-        b2.setCallbackData("personalFinance");
+        b2.setText(callBackMap.get("workspaces"));
+        b2.setCallbackData("workspaces");
         row1.add(b1);
         row1.add(b2);
         keyboard.add(row1);
         InlineKeyboardButton b12 = new InlineKeyboardButton();
+        InlineKeyboardButton b22 = new InlineKeyboardButton();
         b12.setCallbackData("utiltools");
         b12.setText(callBackMap.get("utiltools"));
+        b22.setText(callBackMap.get("appList"));
+        b22.setCallbackData("appList");
+        row2.add(b22);
         row2.add(b12);
         keyboard.add(row2);
         return keyboard;
@@ -363,6 +413,8 @@ public class BotNotificationServiceCommon {
                     callBack = callBack.trim().split("-")[0];
                 }
                 return callBack;
+            } else if (sp.length == 1){
+                return command.trim().replace("/", "");
             }
         }
         return "";

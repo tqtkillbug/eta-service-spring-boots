@@ -5,6 +5,7 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.etaservice.comon.Constant;
 import net.etaservice.comon.DateUtils;
 import net.etaservice.comon.StringUtils;
 import net.etaservice.comon.googlesheet.SheetUtils;
@@ -291,7 +292,6 @@ public class FinanceRoute {
 
     @SneakyThrows
     private void buildReportFinance(){
-        Long  chatIdBoss = 904114553L;
         Date date = new Date();
         int currentDay =  LocalDate.now().getDayOfMonth();
         List<List<Object>> listSpendingToday = getListSpending(currentDay, serviceCommon);
@@ -316,7 +316,7 @@ public class FinanceRoute {
         buidler.append("| Total spending today: ").append("<i>").append(StringUtils.formatCuurencyVnd(String.valueOf(total))).append("</i>").append("      |");
         SendMessage sendMessage = new SendMessage();
         sendMessage.setText(buidler.toString());
-        sendMessage.setChatId(chatIdBoss);
+        sendMessage.setChatId(Constant.CHAT_ID_BOSS);
         sendMessage.setParseMode(ParseMode.HTML);
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(buildFunctionPersonalFinance());
