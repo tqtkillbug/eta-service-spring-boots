@@ -32,8 +32,7 @@ public class TaskRoute {
     private BotNotificationServiceCommon botServiceCommon;
 
 
-//    @Scheduled(cron = "0 30 8 * * ?")
-     @Scheduled(initialDelay = 1000, fixedDelay=Long.MAX_VALUE)
+    @Scheduled(cron = "0 30 8 * * ?")
     public void scheduleRemindTaskCommon(){
         Map<String,String> map = new HashMap<>();
         List<TaskListInfo> listTaskListInfo = taskService.getListTaskInfo();
