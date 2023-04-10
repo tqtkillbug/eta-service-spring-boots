@@ -46,11 +46,19 @@ public class FinanceRoute {
         return map;
     }
 
-    @Scheduled(cron = "0 30 22 * * ?")
+    @Scheduled(cron = "0 10 22 * * ?")
     public void reportFinanceEveryDay(){
-        // Run at 22h30 every day
+        // Run at 22h10 every day
         log.info("*****reportFinanceEveryDay******");
         buildReportFinance();
+    }
+
+    @SneakyThrows
+    @Scheduled(cron = "0 12 * * 0")
+    public void reportFinanceEveryWeek(){
+        // Run at 12h every sunday
+        log.info("*****reportFinanceEveryDay******");
+       buildReportFinanceOneWeek();
     }
 
     
@@ -263,7 +271,7 @@ public class FinanceRoute {
     public void getListSpendingToday(BotNotificationServiceCommon notiServiceCommon, Long chatId, Update update) throws GeneralSecurityException, IOException {
         LocalDate currentDate = LocalDate.now();
         int currentDay = currentDate.getDayOfMonth();
-        List<List<Object>> listSpendingToday = getListSpending(currentDay, notiServiceCommon);
+        List<List<Object>> listSpendingToday = getListSpending(currentDay,currentDay, notiServiceCommon);
         StringBuilder buidler = new StringBuilder();
         BigDecimal total = new BigDecimal(BigInteger.ZERO);
         for (List<Object> row : listSpendingToday) {
@@ -294,7 +302,7 @@ public class FinanceRoute {
     private void buildReportFinance(){
         Date date = new Date();
         int currentDay =  LocalDate.now().getDayOfMonth();
-        List<List<Object>> listSpendingToday = getListSpending(currentDay, serviceCommon);
+        List<List<Object>> listSpendingToday = getListSpending(currentDay,currentDay, serviceCommon);
         StringBuilder buidler = new StringBuilder();
         BigDecimal total = new BigDecimal(BigInteger.ZERO);
         buidler.append("|----REPORT_SPENDING_").append(DateUtils.formatDate(date, DateUtils.FORMAT_DD_MM_YY)).append("----\n");
@@ -325,16 +333,68 @@ public class FinanceRoute {
         serviceCommon.sendTranferMessage(sendMessage);
     }
 
+    @SneakyThrows
+    private void buildReportFinanceOneWeek(){
+        Date date = new Date();
+         LocalDate now = LocalDate.now();
+        int currentDay = now.getDayOfMonth();
+        LocalDate oneWeekAgo = now.minusWeeks(1);
+        int dayOneWeekAgo = oneWeekAgo.getDayOfMonth();
+        List<List<Object>> listSpendingThisWeek  = getListSpending(dayOneWeekAgo,currentDay,serviceCommon);
+        StringBuilder buidler = new StringBuilder();
+        BigDecimal total = new BigDecimal(BigInteger.ZERO);
+        buidler.append("|----REPORT_SPENDING_THIS_WEEK").append("----\n");
+        for (int i = 0; i < listSpendingThisWeek.size(); i++) {
+            List<Object> row  = listSpendingThisWeek.get(i);
+            if (i > 0){
+                if (!row.get(0).toString().equals(listSpendingThisWeek.get(i-1))){
+                    buidler.append("==Day: ").append(row.get(0)).append("==\n");
+                }
+            } else{
+                buidler.append("==Day: ").append(row.get(0)).append("==\n");
+            }
+            buidler.append("| Amount:     <b>").append(row.get(1)).append("</b>\n");
+            buidler.append("| Type:          <b>").append(row.get(3)).append("</b>\n");
+            buidler.append("| Soure:        <b>").append(row.get(5)).append("</b>\n");
+            if (row.size() > 6 && row.get(6) != null){
+                buidler.append("| Note:           <b>").append(row.get(6)).append("</b>\n");
+            }
+            buidler.append("|------------------------------------------\n");
 
-    private List<List<Object>> getListSpending(Integer date, BotNotificationServiceCommon notiServiceCommon) throws GeneralSecurityException, IOException {
-        String rangeShet = "3/2023!A30:G200";
+            String subAmount = row.get(1).toString();
+            subAmount = subAmount.replaceAll("[^\\d.,]", "");
+            subAmount = subAmount.replace(".", "");
+            BigDecimal bigDecimal = new BigDecimal(subAmount);
+            total = total.add(bigDecimal);
+        }
+        buidler.append("| Week spending today: ").append("<i>").append(StringUtils.formatCuurencyVnd(String.valueOf(total))).append("</i>").append("      |");
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setText(buidler.toString());
+        sendMessage.setChatId(Constant.CHAT_ID_BOSS);
+        sendMessage.setParseMode(ParseMode.HTML);
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(buildFunctionPersonalFinance());
+        inlineKeyboardMarkup.getKeyboard().addAll(BotNotificationServiceCommon.buildCommonButton());
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+        serviceCommon.sendTranferMessage(sendMessage);
+    }
+
+
+    private List<List<Object>> getListSpending(Integer fromDate,Integer toDate, BotNotificationServiceCommon notiServiceCommon) throws GeneralSecurityException, IOException {
+        String rangeShet = "3/2023!A109:G222";
         ValueRange response = notiServiceCommon.getSheetsService().getDataSheet(rangeShet);
         List<List<Object>> resultData = new ArrayList<>();
         List<List<Object>> values = response.getValues();
-        for (List<Object> rowData : values) {
+        if (toDate == null){
+            toDate = fromDate;
+        }
+            for (List<Object> rowData : values) {
             if (rowData.size() > 3) {
-                if (date.toString().equals(rowData.get(0))) {
-                    resultData.add(rowData);
+                if (StringUtils.isNumberic((String) rowData.get(0))){
+                    Integer rowDate = Integer.valueOf(rowData.get(0).toString()) ;
+                    if (fromDate <= rowDate && rowDate <= toDate) {
+                        resultData.add(rowData);
+                    }
                 }
             }
         }
@@ -369,7 +429,7 @@ public class FinanceRoute {
 
 
     private int findRowEmpty(BotNotificationServiceCommon notiServiceCommon) throws GeneralSecurityException, IOException {
-        String cell = "3/2023!A1:A150";
+        String cell = "3/2023!A111:A300";
         ValueRange response = notiServiceCommon.getSheetsService().getDataSheet(cell);
         List<List<Object>> values = response.getValues();
         if (values == null) return 1;
@@ -542,4 +602,5 @@ public class FinanceRoute {
         }
         return stringBuilder.toString();
     }
+
 }
