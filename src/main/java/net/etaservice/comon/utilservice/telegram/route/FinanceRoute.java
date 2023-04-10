@@ -54,7 +54,7 @@ public class FinanceRoute {
     }
 
     @SneakyThrows
-    @Scheduled(cron = "0 12 * * 0")
+    @Scheduled(cron = "0 12 * * 0 *")
     public void reportFinanceEveryWeek(){
         // Run at 12h every sunday
         log.info("*****reportFinanceEveryDay******");
