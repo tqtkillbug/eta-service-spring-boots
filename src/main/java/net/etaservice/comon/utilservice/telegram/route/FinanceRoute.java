@@ -54,7 +54,7 @@ public class FinanceRoute {
     }
 
     @SneakyThrows
-//    @Scheduled(cron = "0 12 * * 0 *")
+//    @Scheduled(cron = "0 12 * * 0 ?")
     public void reportFinanceEveryWeek(){
         // Run at 12h every sunday
         log.info("*****reportFinanceEveryDay******");
@@ -429,7 +429,7 @@ public class FinanceRoute {
 
 
     private int findRowEmpty(BotNotificationServiceCommon notiServiceCommon) throws GeneralSecurityException, IOException {
-        String cell = "3/2023!A111:A300";
+        String cell = "3/2023!A1:A500";
         ValueRange response = notiServiceCommon.getSheetsService().getDataSheet(cell);
         List<List<Object>> values = response.getValues();
         if (values == null) return 1;
