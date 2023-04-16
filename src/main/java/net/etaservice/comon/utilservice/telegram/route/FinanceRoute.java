@@ -54,16 +54,28 @@ public class FinanceRoute {
     }
 
     @SneakyThrows
-//    @Scheduled(cron = "0 12 * * 0 ?")
+    @Scheduled(cron = "0 0 12 ? * SUN")
     public void reportFinanceEveryWeek(){
         // Run at 12h every sunday
         log.info("*****reportFinanceEveryDay******");
        buildReportFinanceOneWeek();
     }
 
-    
+
+    @Scheduled(cron = "0 0 14 * * ?")
+    public void remindInsertSpending14h(){
+        remindInsertSpend();
+    }
+
+    @Scheduled(cron = "0 0 20 * * ?")
+    public void remindInsertSpending20h(){
+        remindInsertSpend();
+    }
+
+
     @BotCallBack(name = "personalFinance")
     public void handlerManagerPeronalFinance(BotNotificationServiceCommon notiServiceCommon, Long chatId, Update updateParam) {
+        remindInsertSpend();
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText("Functions to get balance, statistics for your personal financial management:");
@@ -601,6 +613,21 @@ public class FinanceRoute {
             stringBuilder.append("Note: ").append("<b>").append(listDataSheet.get(6)).append("</b>");
         }
         return stringBuilder.toString();
+    }
+
+    private void remindInsertSpend(){
+        Map<String, String> preSubmitButton = new HashMap<>();
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        SendMessage sendMessage = new SendMessage();
+        Map<String, String> callBackMap = BotNotificationServiceCommon.mapCallBackFinance;
+        preSubmitButton.put("insertspending",callBackMap.get("insertspending"));
+        inlineKeyboardMarkup.setKeyboard(serviceCommon.createInlineKeyboard(preSubmitButton, null));
+        inlineKeyboardMarkup.getKeyboard().addAll(serviceCommon.buildCommonButton());
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+        sendMessage.setChatId(Constant.CHAT_ID_BOSS);
+        sendMessage.setText("<b>Thời gian qua bạn có chi tiêu gì không?, hãy thêm chi tiêu bạn bạn</b>");
+        sendMessage.setParseMode(ParseMode.HTML);
+        serviceCommon.sendTranferMessage(sendMessage);
     }
 
 }
