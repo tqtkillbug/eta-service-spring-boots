@@ -75,7 +75,6 @@ public class FinanceRoute {
 
     @BotCallBack(name = "personalFinance")
     public void handlerManagerPeronalFinance(BotNotificationServiceCommon notiServiceCommon, Long chatId, Update updateParam) {
-        remindInsertSpend();
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText("Functions to get balance, statistics for your personal financial management:");
