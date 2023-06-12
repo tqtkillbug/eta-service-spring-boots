@@ -392,7 +392,7 @@ public class FinanceRoute {
 
 
     private List<List<Object>> getListSpending(Integer fromDate,Integer toDate, BotNotificationServiceCommon notiServiceCommon) throws GeneralSecurityException, IOException {
-        String rangeShet = "3/2023!A109:G222";
+        String rangeShet = "3/2023!A214:G445";
         ValueRange response = notiServiceCommon.getSheetsService().getDataSheet(rangeShet);
         List<List<Object>> resultData = new ArrayList<>();
         List<List<Object>> values = response.getValues();
