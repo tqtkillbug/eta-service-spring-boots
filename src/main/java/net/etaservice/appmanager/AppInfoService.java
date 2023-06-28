@@ -15,4 +15,8 @@ public class AppInfoService {
     public AppInfo getAppInfoByCode(String code) {
         return appInfoRepository.findByAppCode(code);
     }
+
+    public AppInfo saveAppInfo(AppInfo appInfo){
+        return appInfoRepository.save(appInfo);
+    }
 }

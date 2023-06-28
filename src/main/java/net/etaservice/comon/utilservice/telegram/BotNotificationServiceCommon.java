@@ -8,6 +8,7 @@ import net.etaservice.comon.googlesheet.SheetsService;
 import net.etaservice.comon.utilservice.telegram.customanotation.AnnotationHandler;
 import net.etaservice.comon.utilservice.telegram.customanotation.BotRoute;
 import net.etaservice.comon.utilservice.telegram.route.FinanceRoute;
+import net.etaservice.comon.utilservice.telegram.route.ManageAppsRoute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -47,6 +48,9 @@ public class BotNotificationServiceCommon {
 
     @Autowired
     private FinanceRoute financeRoute;
+
+    @Autowired
+    private ManageAppsRoute appManagerRoute;
 
 
     @Value("${telegram.bot.username}")
@@ -115,6 +119,7 @@ public class BotNotificationServiceCommon {
         mapCallBackButton.putAll(mapCallBackManaApps);
         mapCallBackButton.putAll(mapWorkspaceCallBack);
         mapCallBackButton.putAll(mapActionTaskCallBack);
+        mapCallBackButton.putAll(mapFunctionAppMapparam);
         return  mapCallBackButton;
     }
 
@@ -169,6 +174,13 @@ public class BotNotificationServiceCommon {
         mapActionTaskCallBack.put("newTaskStep2", "Insert Task 2");
         mapActionTaskCallBack.put("listTaskList", "List Task List");
     }
+
+    public static Map<String,String> mapFunctionAppMapparam = new LinkedHashMap<>(){
+    };
+    static {
+        mapFunctionAppMapparam.put("changeNotifyMaparam", "Change Notify");
+    }
+
 
 
     public static Map<String,String> mapSourceSpendingAction(){
@@ -267,6 +279,10 @@ public class BotNotificationServiceCommon {
                     boolean isHandled =  annotationHandler.callMethodByAnoBotCallBack("newtask",message.getChatId(),update);
                     if (isHandled) return;
                 }
+                if (isCallbackConfigAppInfo(updateList)) {
+                    boolean isHandled =  appManagerRoute.handleUpdateNotifyMappram(updateList, textClient, this, chatId);
+                    if (isHandled) return;
+                }
 
                 String comandHandler = handlerComandToCB(textClient);
                 if (!comandHandler.isEmpty()){
@@ -308,6 +324,27 @@ public class BotNotificationServiceCommon {
                 try {
                     String functionId = callbackData.get().trim().split(":")[0];
                     if (mapActionTaskCallBack.containsKey(functionId)) {
+                        return true;
+                    }
+                } catch (Exception e){
+                    continue;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isCallbackConfigAppInfo(List<Update> updateList) {
+        Optional<String> callbackData = Optional.empty();
+        int[] indexes = {2};
+        for (int index : indexes) {
+            if (updateList.size() >= index) {
+                Update update = updateList.get(updateList.size() - index);
+                callbackData = Optional.ofNullable(update.getCallbackQuery())
+                        .map(CallbackQuery::getData);
+                try {
+                    String functionId = callbackData.get().trim().split(":")[0];
+                    if (mapFunctionAppMapparam.containsKey(functionId)) {
                         return true;
                     }
                 } catch (Exception e){

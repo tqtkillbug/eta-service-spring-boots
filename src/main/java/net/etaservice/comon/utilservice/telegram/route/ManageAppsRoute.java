@@ -1,5 +1,7 @@
 package net.etaservice.comon.utilservice.telegram.route;
 
+import net.etaservice.appmanager.AppInfoService;
+import net.etaservice.appmanager.model.AppInfo;
 import net.etaservice.comon.utilservice.telegram.BotNotificationServiceCommon;
 import net.etaservice.comon.utilservice.telegram.customanotation.BotCallBack;
 import net.etaservice.comon.utilservice.telegram.customanotation.BotRoute;
@@ -13,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @BotRoute
@@ -27,6 +30,9 @@ public class ManageAppsRoute {
 
     @Autowired
     private IApiMetrics apiMetrics;
+
+    @Autowired
+    private AppInfoService appInfoService;
 
     @BotCallBack(name = "appList")
     public void handlerAppList(BotNotificationServiceCommon botNotificationServiceCommon, Long chatId, Update updateParam)  {
@@ -54,6 +60,8 @@ public class ManageAppsRoute {
         String apiName = "";
         if (appId.equals("mapparam")){
             apiName = "api/v1/free/app/ping/MAP";
+            configAppMaparam(chatId);
+            return;
         } else if (appId.equals("newsDay")){
             apiName = "api/v1/free/app/news/last";
         } else if (appId.equals("newsDay")){
@@ -68,4 +76,47 @@ public class ManageAppsRoute {
         sendMessage.setParseMode(ParseMode.HTML);
         notifiCommon.sendTranferMessage(sendMessage);
     }
+
+    public void configAppMaparam(Long chatId){
+        Map<String,String> mapApp = BotNotificationServiceCommon.mapCallBackManaApps;
+        InlineKeyboardMarkup inline = new InlineKeyboardMarkup();
+        inline.setKeyboard(notifiCommon.createInlineKeyboard(BotNotificationServiceCommon.mapFunctionAppMapparam, null));
+        inline.getKeyboard().addAll(BotNotificationServiceCommon.buildCommonButton());
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setReplyMarkup(inline);
+        sendMessage.setChatId(chatId);
+        sendMessage.setText("Choose function config App Mappram");
+        sendMessage.setParseMode(ParseMode.HTML);
+        notifiCommon.sendTranferMessage(sendMessage);
+    }
+
+    @BotCallBack(name = "changeNotifyMaparam")
+    public void changeNotifyMaparam(BotNotificationServiceCommon botNotificationServiceCommon, Long chatId, Update updateParam){
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setText("Enter new notify for app Mappram:");
+        sendMessage.setChatId(chatId);
+        sendMessage.setParseMode(ParseMode.HTML);
+        notifiCommon.sendTranferMessage(sendMessage);
+    }
+
+    public boolean handleUpdateNotifyMappram(List<Update> updates, String value, BotNotificationServiceCommon notiServiceCommon, String chatId){
+        if (updates.get(updates.size() - 2).getCallbackQuery() != null && updates.get(updates.size() - 2).getCallbackQuery().getData().equals("changeNotifyMaparam")){
+            AppInfo appInfo = appInfoService.getAppInfoByCode("MAP");
+            appInfo.setLastNotify(value);
+            appInfoService.saveAppInfo(appInfo);
+            InlineKeyboardMarkup inline = new InlineKeyboardMarkup();
+            inline.setKeyboard(BotNotificationServiceCommon.buildCommonButton());
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setText("Updated Notify for app Mapparam!");
+            sendMessage.setChatId(chatId);
+            sendMessage.setParseMode(ParseMode.HTML);
+            sendMessage.setReplyMarkup(inline);
+            notifiCommon.sendTranferMessage(sendMessage);
+            return true;
+        }
+        return false;
+    }
+
+
 }
