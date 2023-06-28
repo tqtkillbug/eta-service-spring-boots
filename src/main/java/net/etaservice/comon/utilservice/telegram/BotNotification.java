@@ -30,12 +30,12 @@ public class BotNotification extends TelegramLongPollingBot {
     private BotNotificationServiceCommon notificationService;
 
     public String getBotUsername() {
-        return "etatqt_bot";
+        return "tqtmanager_bot";
     }
 
     @Override
     public String getBotToken() {
-        return "5761176822:AAE46iEwoW2_-40r--O_ehIwerU9ObslJec";
+        return "5992308410:AAHPEcbiWqsIfQ9yhH4_1Ndi2NozWCNjuCQ";
     }
 
     @SneakyThrows
