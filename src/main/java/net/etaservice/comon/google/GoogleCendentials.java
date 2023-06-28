@@ -19,6 +19,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,18 +40,44 @@ public class GoogleCendentials {
 
     private static final List<String> SCOPES = Arrays.asList(SheetsScopes.SPREADSHEETS, TasksScopes.TASKS);
 
+//
+//    @SneakyThrows
+//    public Credential getCredentials()
+//            throws IOException {
+//        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+//
+//        InputStream in = new FileInputStream(CREDENTIALS_FILE_PATH);
+//        if (in == null) {
+//            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
+//        }
+//        GoogleClientSecrets clientSecrets =
+//                GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+//
+//        // Build flow and trigger user authorization request.
+//        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+//                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+//                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
+//                .setAccessType("offline")
+//                .build();
+//        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+//
+//        Credential credential = flow.loadCredential("user");
+//        if (credential != null && credential.getRefreshToken() != null) {
+//            credential.refreshToken();
+//        } else {
+//            credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+//        }
+//        return credential;
+//    }
 
-    @SneakyThrows
-    public Credential getCredentials()
-            throws IOException {
+    public Credential getCredentials() throws IOException, GeneralSecurityException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 
         InputStream in = new FileInputStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
-        GoogleClientSecrets clientSecrets =
-                GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         // Build flow and trigger user authorization request.
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
@@ -62,10 +89,15 @@ public class GoogleCendentials {
 
         Credential credential = flow.loadCredential("user");
         if (credential != null && credential.getRefreshToken() != null) {
-            credential.refreshToken();
+            Long expiresInSeconds = credential.getExpiresInSeconds();
+            if (expiresInSeconds == null || expiresInSeconds <= 60) {
+                credential.refreshToken();
+            }
         } else {
             credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
         }
         return credential;
     }
+
+
 }

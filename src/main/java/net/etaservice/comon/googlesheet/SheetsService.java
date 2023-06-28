@@ -17,22 +17,26 @@ import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.api.services.tasks.TasksScopes;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import net.etaservice.comon.google.GoogleCendentials;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 @Service
 @PropertySource("application-${spring.profiles.active}.properties")
 @EnableConfigurationProperties
+@Slf4j
 public class SheetsService implements ISheetService {
 
 
@@ -45,6 +49,13 @@ public class SheetsService implements ISheetService {
     private static final String APPLICATION_NAME = "ETASERVICE SHEET API";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
+    @SneakyThrows
+    @Scheduled(fixedDelay = 3600000)
+    public void scheduleFixedDelayTask() {
+        log.info("Call Service to refresh token ");
+        googleCendentials.getCredentials();
+        log.info(" END ---Call Service to refresh token");
+    }
 
     @SneakyThrows
     @Override
