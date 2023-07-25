@@ -43,14 +43,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //		auth.authenticationProvider(authenticationProvider());
 //	}
 
+//	@Override
+//	protected void configure(HttpSecurity http) throws Exception {
+//		http.cors().and().csrf().disable();
+//		http.antMatchers("/websocket-endpoint/**").permitAll();
+//		http.authorizeRequests().anyRequest().permitAll();
+////		http.authorizeRequests()
+////				.antMatchers("/api/v1/free/**")
+////				.permitAll()
+////				.anyRequest().authenticated();
+//	}
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.cors().and().csrf().disable();
-		http.authorizeRequests().anyRequest().permitAll();
-//		http.authorizeRequests()
-//				.antMatchers("/api/v1/free/**")
-//				.permitAll()
-//				.anyRequest().authenticated();
+		http
+				.csrf().disable()
+				.authorizeRequests()
+				.antMatchers("/websocket-endpoint/**","/api/v1/free/**" ).permitAll()
+				.anyRequest().authenticated();
 	}
 
 

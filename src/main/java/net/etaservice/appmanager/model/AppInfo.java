@@ -24,6 +24,8 @@ public class AppInfo {
 
     private String host;
 
+    private long totalVisit;
+
     @Column(name = "app_code", nullable = false)
     private String appCode;
 
@@ -32,6 +34,7 @@ public class AppInfo {
         appInfoDTO.setAppName(this.getAppName());
         appInfoDTO.setVersion(this.getVersion());
         appInfoDTO.setLastNotify(this.getLastNotify());
+        appInfoDTO.setTotalVisit(totalVisit);
         return  appInfoDTO;
     }
 

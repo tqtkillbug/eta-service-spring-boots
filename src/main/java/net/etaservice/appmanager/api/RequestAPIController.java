@@ -41,10 +41,13 @@ public class RequestAPIController {
         if (requestApp == null) {
         } else {
             if (requestApp.getAppName() != null){
-                apiMetrics.increaseCount("api/v1/free/app/ping/" +requestApp.getAppName());
+                String apiName = "api/v1/free/app/ping/" +requestApp.getAppName();
+                apiMetrics.increaseCount(apiName);
+                long totalVisit =  apiMetrics.countApiMertrics(apiName);
                 AppInfo appInfo = appInfoRepository.findByAppCode(requestApp.getAppName());
                 if (appInfo != null){
                     AppInfoDTO appInfoDTO = appInfo.toDTO();
+                    appInfoDTO.setTotalVisit(totalVisit);
                     response = new Gson().toJson(appInfoDTO);
                 }
             }
