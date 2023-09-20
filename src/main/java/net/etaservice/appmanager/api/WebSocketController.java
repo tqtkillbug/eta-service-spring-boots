@@ -1,23 +1,25 @@
 package net.etaservice.appmanager.api;
 
-import net.etaservice.appmanager.UserCountService;
+import net.etaservice.configapp.websocket.WebSocketEventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 @Controller
 public class WebSocketController {
 
     @Autowired
-    private UserCountService userCountService;
+    private SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/user-joined")
-    public void userJoined(String username) {
-        userCountService.incrementUserCount();
-    }
-
-    @MessageMapping("/user-left")
-    public void userLeft(String username) {
-        userCountService.decrementUserCount();
+    @MessageMapping("/requestEndpoint")
+    @SendTo("/user/queue/reply")
+    public String handleRequest(@Payload String request) {
+        // Xử lý yêu cầu từ máy khách
+        String response = String.valueOf(WebSocketEventListener.onlineUsers);
+        messagingTemplate.convertAndSend("/topic/onlineUserNow", response);
+        return response;
     }
 }
