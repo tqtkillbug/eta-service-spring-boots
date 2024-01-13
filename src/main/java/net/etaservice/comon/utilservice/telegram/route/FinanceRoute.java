@@ -64,12 +64,12 @@ public class FinanceRoute {
 
     @Scheduled(cron = "0 0 14 * * ?")
     public void remindInsertSpending14h(){
-        remindInsertSpend();
+//        remindInsertSpend();
     }
 
     @Scheduled(cron = "0 0 20 * * ?")
     public void remindInsertSpending20h(){
-        remindInsertSpend();
+//        remindInsertSpend();
     }
 
 
