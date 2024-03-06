@@ -2,11 +2,10 @@ package net.etaservice.comon.utilservice.telegram;
 
 import net.etaservice.appmanager.repository.AppInfoRepository;
 import net.etaservice.appmanager.repository.RequetsAppRepository;
+import net.etaservice.comon.Constant;
 import net.etaservice.comon.domain.LimitedQueue;
 import net.etaservice.comon.googlesheet.ISheetService;
-import net.etaservice.comon.googlesheet.SheetsService;
 import net.etaservice.comon.utilservice.telegram.customanotation.AnnotationHandler;
-import net.etaservice.comon.utilservice.telegram.customanotation.BotRoute;
 import net.etaservice.comon.utilservice.telegram.route.FinanceRoute;
 import net.etaservice.comon.utilservice.telegram.route.ManageAppsRoute;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,15 +13,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Component
@@ -455,6 +453,15 @@ public class BotNotificationServiceCommon {
             }
         }
         return "";
+    }
+
+
+    public void pushToBoss(String message){
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(Constant.CHAT_ID_BOSS);
+        sendMessage.setText(message);
+        sendMessage.setParseMode(ParseMode.HTML);
+        sendTranferMessage(sendMessage);
     }
 
 
