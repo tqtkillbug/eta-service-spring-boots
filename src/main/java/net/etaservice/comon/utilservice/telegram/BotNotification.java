@@ -2,6 +2,7 @@ package net.etaservice.comon.utilservice.telegram;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.etaservice.airdrop.AirdropService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -29,6 +30,9 @@ public class BotNotification extends TelegramLongPollingBot {
     @Autowired
     private BotNotificationServiceCommon notificationService;
 
+    @Autowired
+    private AirdropService airdropService;
+
     public String getBotUsername() {
         return "tqtmanager_bot";
 //        return "etatqt_bot";
@@ -45,8 +49,10 @@ public class BotNotification extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         if (update.hasCallbackQuery()) {
          this.notificationService.handlerCallbackQuery(update);
-        } else  if (update.hasMessage() && update.getMessage().hasText()) {
+        } else if (update.hasMessage() && update.getMessage().hasText()) {
           this.notificationService.handleMessageReceive(update);
+        } else if (update.getChannelPost().getChat().getType().equals("channel")){
+           this.airdropService.handleForwardNoteAirdrop(update.getChannelPost());
         }
     }
 
