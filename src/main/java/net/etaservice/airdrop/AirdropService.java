@@ -49,7 +49,7 @@ public class AirdropService {
                 .setSourceChanelLink(linkSourceChannel)
                 .setNote("NOTE_AIRDROP");
 
-//         String res = restService.callPostApi(AIRMON_PUSH_URL,airProject);
+         String res = restService.callPostApi(AIRMON_PUSH_URL,airProject);
    }
 
     private String handleDescriptionBindLink(String chatFwContent, List<MessageEntity> listEntity) {
