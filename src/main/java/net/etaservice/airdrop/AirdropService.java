@@ -8,6 +8,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.MessageEntity;
+
+import java.util.List;
 
 @Service
 @PropertySource("application-${spring.profiles.active}.properties")
@@ -32,6 +35,10 @@ public class AirdropService {
 
          String chatFwContent = channelPost.getCaption();
 
+        List<MessageEntity> listEntity = channelPost.getCaptionEntities();
+
+        chatFwContent =  handleDescriptionBindLink(chatFwContent,listEntity);
+
          String linkSourceChannel = getSourceLinkChannel(chatForward.getUserName());
 
          String sourceLink = getSourceLinkMessage(linkSourceChannel,channelPost.getForwardFromMessageId());
@@ -40,19 +47,29 @@ public class AirdropService {
                  .setSourceName(chatFwTitle)
                 .setSourceLink(sourceLink)
                 .setSourceChanelLink(linkSourceChannel)
-                .setNote("FROM NOTE_AIRDROP");
+                .setNote("NOTE_AIRDROP");
 
-         String res = restService.callPostApi(AIRMON_PUSH_URL,airProject);
+//         String res = restService.callPostApi(AIRMON_PUSH_URL,airProject);
    }
 
-   private String getSourceLinkMessage(String linkSourceChannel, long chatSourceMessId){
+    private String handleDescriptionBindLink(String chatFwContent, List<MessageEntity> listEntity) {
+        for (MessageEntity entity : listEntity) {
+            if (entity.getType().equals("text_link") && entity.getUrl() != null){
+                String key = entity.getText();
+//                String htmlLink = "<a href=\"" + entity.getUrl() + "\">" + key + "</a>";
+                chatFwContent = chatFwContent.replace(key,entity.getUrl());
+            }
+        }
+        return chatFwContent;
+    }
+
+    private String getSourceLinkMessage(String linkSourceChannel, long chatSourceMessId){
        return linkSourceChannel + "/" + chatSourceMessId;
    }
 
    private String getSourceLinkChannel(String userNameSource){
        return TELE_DOMAIN + userNameSource;
    }
-
 
 
 }
