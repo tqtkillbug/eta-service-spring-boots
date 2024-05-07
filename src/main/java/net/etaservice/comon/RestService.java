@@ -27,4 +27,20 @@ public class RestService {
         }
     }
 
+    public <T> T callGetApi(String apiUrl, Class<T> clazz) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<T> response = restTemplate.getForEntity(apiUrl, clazz);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return response.getBody();
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
 }

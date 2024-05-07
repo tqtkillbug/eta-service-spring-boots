@@ -1,5 +1,7 @@
 package net.etaservice.comon.utilservice.telegram.route;
 
+import net.etaservice.airdrop.AirdropService;
+import net.etaservice.airdrop.model.Wallet;
 import net.etaservice.appmanager.AppInfoService;
 import net.etaservice.appmanager.model.AppInfo;
 import net.etaservice.comon.utilservice.telegram.BotNotificationServiceCommon;
@@ -17,6 +19,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @BotRoute
 @Component
@@ -33,6 +36,9 @@ public class ManageAppsRoute {
 
     @Autowired
     private AppInfoService appInfoService;
+
+    @Autowired
+    private AirdropService airdropService;
 
     @BotCallBack(name = "appList")
     public void handlerAppList(BotNotificationServiceCommon botNotificationServiceCommon, Long chatId, Update updateParam)  {
@@ -90,6 +96,8 @@ public class ManageAppsRoute {
         notifiCommon.sendTranferMessage(sendMessage);
     }
 
+
+
     @BotCallBack(name = "changeNotifyMaparam")
     public void changeNotifyMaparam(BotNotificationServiceCommon botNotificationServiceCommon, Long chatId, Update updateParam){
         SendMessage sendMessage = new SendMessage();
@@ -99,6 +107,39 @@ public class ManageAppsRoute {
         sendMessage.setParseMode(ParseMode.HTML);
         notifiCommon.sendTranferMessage(sendMessage);
     }
+
+    @BotCallBack(name = "wallet")
+    public void getWalletinfo(BotNotificationServiceCommon botNotificationServiceCommon, Long chatId, Update updateParam){
+        Long walletId = handleMessageGetWalletId(updateParam);
+        Wallet wallet = airdropService.getWalletInfoFromAirmon(walletId);
+        String messResponse;
+        if (Objects.isNull(wallet)){
+            messResponse = "<i>Wallet Not Found!</i>";
+        } else {
+            messResponse = buildMessageWalletInfo(wallet);
+        }
+
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(messResponse);
+        sendMessage.setChatId(chatId);
+        sendMessage.setParseMode(ParseMode.HTML);
+        notifiCommon.sendTranferMessage(sendMessage);
+    }
+
+    private String buildMessageWalletInfo(Wallet wallet) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("<b>|------------Wallet Info ID[").append(wallet.getId()).append("] ----------|</b>\n");
+        builder.append("<b>Name:  </b>").append(wallet.getAccountName()).append("\n");
+        builder.append("<b>Profile:  </b>").append(wallet.getProfile().getName()).append("\n");
+        builder.append("<b>Address:  </b>[").append("<code>").append(wallet.getPublicKey()).append("</code>").append("]\n");
+        builder.append("<b>Key:  </b>[").append("<code>").append(wallet.getPrivateKey()).append("</code>").append("]\n");
+        builder.append("<b>Chain:  </b>").append(wallet.getChain()).append("\n");
+        builder.append("<b>Type:  </b>").append(wallet.getType()).append("\n");
+        builder.append("<b>Note:  </b>").append(wallet.getNote()).append("\n");
+        return builder.toString();
+    }
+
 
     public boolean handleUpdateNotifyMappram(List<Update> updates, String value, BotNotificationServiceCommon notiServiceCommon, String chatId){
         if (updates.get(updates.size() - 2).getCallbackQuery() != null && updates.get(updates.size() - 2).getCallbackQuery().getData().equals("changeNotifyMaparam")){
@@ -116,6 +157,12 @@ public class ManageAppsRoute {
             return true;
         }
         return false;
+    }
+
+    private Long handleMessageGetWalletId(Update update){
+      String mess = update.getMessage().getText();
+      mess = mess.replace("/wallet","").trim();
+      return Long.valueOf(mess);
     }
 
 
