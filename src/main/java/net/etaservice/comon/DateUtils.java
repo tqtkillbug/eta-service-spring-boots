@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.TimeZone;
@@ -41,7 +42,18 @@ public class DateUtils {
         return futureDateTime.format(formatter);
     }
 
+
     public static final String FORMAT_COMOM = "dd/MM/yyyy";
     public static final String FORMAT_DD_MM_YY = "dd_MM_yyyy";
 
+
+    public static Date getCurentDateWithoutTime(){
+        LocalDateTime localDateTime = LocalDateTime.now()
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0);
+
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
 }

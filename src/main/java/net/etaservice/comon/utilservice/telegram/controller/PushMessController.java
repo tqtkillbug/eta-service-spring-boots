@@ -1,5 +1,6 @@
 package net.etaservice.comon.utilservice.telegram.controller;
 
+import net.etaservice.comon.utilservice.logger.LogService;
 import net.etaservice.comon.utilservice.telegram.BotNotificationServiceCommon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,9 +17,13 @@ public class PushMessController {
     @Autowired
     private BotNotificationServiceCommon botService;
 
+    @Autowired
+    private LogService logService;
+
     @PostMapping("/notify/push")
     ResponseEntity<String> pushMessageToBot(@RequestBody String string){
-        botService.pushToBoss(string);
+        String messHanlded = logService.handleLogFromMessage(string);
+        botService.pushToBoss(messHanlded);
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
